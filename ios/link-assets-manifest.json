@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Manrope-SemiBold.ttf",
+      "sha1": "f7a023cd6c102b2ffa8bf729579552445970d62d"
+    },
+    {
+      "path": "src/assets/fonts/Poppins-Bold.ttf",
+      "sha1": "875cf0cecd647bcf22e79d633d868c1b1ec98dfa"
+    },
+    {
+      "path": "src/assets/fonts/Urbanist-Medium.ttf",
+      "sha1": "f68fbe2907f0f54404642cdb9a11ff626301a130"
+    },
+    {
+      "path": "src/assets/fonts/Urbanist-Regular.ttf",
+      "sha1": "d2e596224a2ea7c2c7eb9f6edbb79664d6f3c1da"
+    }
+  ]
+}

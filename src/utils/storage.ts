@@ -132,7 +132,7 @@ export const storage = {
   },
 
   // --- Cache ---
-  async setCache(key: string, data: any, expiresInMs = 24 * 60 * 60 * 1000): Promise<void> {
+  async setCache<T>(key: string, data: T, expiresInMs = 24 * 60 * 60 * 1000): Promise<void> {
     try {
       const cacheData = { data, expiresAt: Date.now() + expiresInMs };
       await AsyncStorage.setItem(`${KEYS.CACHE_PREFIX}${key}`, JSON.stringify(cacheData));
@@ -141,7 +141,7 @@ export const storage = {
     }
   },
 
-  async getCache(key: string): Promise<any | null> {
+  async getCache<T>(key: string): Promise<T | null> {
     try {
       const jsonValue = await AsyncStorage.getItem(`${KEYS.CACHE_PREFIX}${key}`);
       if (!jsonValue) return null;
@@ -150,7 +150,7 @@ export const storage = {
         await AsyncStorage.removeItem(`${KEYS.CACHE_PREFIX}${key}`);
         return null;
       }
-      return cache.data;
+      return cache.data as T;
     } catch (error) {
       console.error(`getCache error (${key}):`, error);
       return null;

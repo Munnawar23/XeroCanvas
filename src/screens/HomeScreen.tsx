@@ -1,30 +1,37 @@
-// src/screens/HomeScreen.tsx
-
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, RefreshControl, ActivityIndicator, FlatList, StatusBar, ListRenderItem } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  RefreshControl,
+  ActivityIndicator,
+  StatusBar,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { FlashList, ListRenderItem } from "@shopify/flash-list";
 
 // Hooks, services, and types
-import { useSafePadding } from '@hooks/useSafePadding';
-import { useTheme } from '@context/ThemeContext';
-import { fetchWallpapers, PixabayImage } from '@services/pixabay';
-import { storage } from '@utils/storage';
-// --- FIX 1: Import the correct, reusable navigation type ---
-import { AppNavigationProp } from '@navigation/types';
+import { useSafePadding } from "@hooks/useSafePadding";
+import { useTheme } from "@context/ThemeContext";
+import { fetchWallpapers, PixabayImage } from "@services/pixabay";
+import { storage } from "@utils/storage";
+import { AppNavigationProp } from "@navigation/types";
 
 // Components
-import { WallpaperCard } from '@components/WallpaperCard';
-import { LoadingCard } from '@components/LoadingCard';
+import { WallpaperCard } from "@components/WallpaperCard";
+import { LoadingCard } from "@components/LoadingCard";
+
+// ✅ Define the expected type from the API/cache
+type PixabayResponse = {
+  hits: PixabayImage[];
+  total: number;
+  totalHits: number;
+};
 
 export default function HomeScreen() {
-  // --- Hooks ---
-  // --- FIX 2: Use the correct type with the useNavigation hook ---
   const navigation = useNavigation<AppNavigationProp>();
   const { isDark } = useTheme();
   const { paddingTop } = useSafePadding();
 
-  // --- State Management ---
   const [wallpapers, setWallpapers] = useState<PixabayImage[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -32,34 +39,48 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // --- Data Fetching ---
+  // Initial load
   useEffect(() => {
     loadWallpapers();
   }, []);
 
-  const loadWallpapers = useCallback(async (pageNum: number = 1, append: boolean = false) => {
-    if (!append) setLoading(true);
-    
-    try {
-      const cacheKey = `wallpapers_page_${pageNum}`;
-      let data = await storage.getCache(cacheKey);
-      if (!data) {
-        data = await fetchWallpapers({ page: pageNum, order: 'popular' });
-        await storage.setCache(cacheKey, data);
-      }
-      if (data.hits.length === 0) setHasMore(false);
-      
-      setWallpapers(prev => (append ? [...prev, ...data.hits] : data.hits));
-    } catch (error) {
-      console.error('Failed to load wallpapers:', error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-      setRefreshing(false);
-    }
-  }, []);
+  // --- Load wallpapers with caching support ---
+  const loadWallpapers = useCallback(
+    async (pageNum: number = 1, append: boolean = false) => {
+      if (!append) setLoading(true);
 
-  // --- Event Handlers ---
+      try {
+        const cacheKey = `wallpapers_page_${pageNum}`;
+        
+        // --- FIX STARTS HERE ---
+        // Assert the type of 'data' to what we expect from the cache or API
+        let data = (await storage.getCache(cacheKey)) as PixabayResponse | null;
+        // --- FIX ENDS HERE ---
+
+        if (!data) {
+          data = await fetchWallpapers({ page: pageNum, order: "popular" });
+          await storage.setCache(cacheKey, data);
+        }
+
+        // Add a safety check to ensure data and data.hits exist before using them
+        if (data && data.hits) {
+            if (data.hits.length === 0) setHasMore(false);
+
+            setWallpapers((prev) => (append ? [...prev, ...data.hits] : data.hits));
+        }
+
+      } catch (error) {
+        console.error("Failed to load wallpapers:", error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        setRefreshing(false);
+      }
+    },
+    []
+  );
+
+  // --- Pull to refresh ---
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     setPage(1);
@@ -67,6 +88,7 @@ export default function HomeScreen() {
     loadWallpapers(1, false);
   }, [loadWallpapers]);
 
+  // --- Load more when scrolled to end ---
   const handleLoadMore = useCallback(() => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
@@ -75,61 +97,84 @@ export default function HomeScreen() {
     loadWallpapers(nextPage, true);
   }, [loadingMore, hasMore, page, loadWallpapers]);
 
-  const handleWallpaperPress = useCallback((wallpaper: PixabayImage) => {
-    navigation.navigate('Detail', { wallpaper: JSON.stringify(wallpaper) });
-  }, [navigation]);
-
-  // --- Render Functions ---
-  const renderItem: ListRenderItem<PixabayImage> = ({ item, index }) => (
-    <Animated.View
-      className="flex-1 p-1.5"
-      entering={FadeInDown.delay(index * 100).duration(400).springify().damping(12)}
-    >
-      <WallpaperCard wallpaper={item} onPress={() => handleWallpaperPress(item)} />
-    </Animated.View>
+  // --- Navigate to wallpaper detail ---
+  const handleWallpaperPress = useCallback(
+    (wallpaper: PixabayImage) => {
+      navigation.navigate("Detail", {
+        wallpaper: JSON.stringify(wallpaper),
+      });
+    },
+    [navigation]
   );
 
+  // --- Render individual wallpaper card ---
+  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => (
+    <View className="flex-1 p-1.5 mb-3">
+      <WallpaperCard
+        wallpaper={item}
+        onPress={() => handleWallpaperPress(item)}
+      />
+    </View>
+  );
+
+  // --- Footer loader ---
   const renderFooter = () => {
     if (!loadingMore) return null;
     return (
       <View className="py-8">
-        <ActivityIndicator size="small" className="text-light-accent dark:text-dark-accent" />
+        <ActivityIndicator
+          size="small"
+          color={isDark ? "#94A3B8" : "#64748B"}
+        />
       </View>
     );
   };
 
-  // --- Loading Skeleton UI ---
+  // --- Loading skeleton ---
   if (loading) {
     return (
-      <View style={{ paddingTop }} className="flex-1 bg-light-background dark:bg-dark-background px-4">
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+      <View
+        style={{ paddingTop }}
+        className="flex-1 bg-light-background dark:bg-dark-background px-4"
+      >
+        <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
         <Text className="font-heading text-3xl text-light-text dark:text-dark-text">
           XeroCanvas
         </Text>
         <View className="mt-4 flex-row gap-x-3">
           <View className="flex-1 gap-y-3">
-            <LoadingCard aspectRatio={1.5} /><LoadingCard aspectRatio={1.2} /><LoadingCard aspectRatio={1.8} />
+            <LoadingCard aspectRatio={1.5} />
+            <LoadingCard aspectRatio={1.2} />
+            <LoadingCard aspectRatio={1.8} />
           </View>
           <View className="flex-1 gap-y-3">
-            <LoadingCard aspectRatio={1.3} /><LoadingCard aspectRatio={1.6} /><LoadingCard aspectRatio={1.4} />
+            <LoadingCard aspectRatio={1.3} />
+            <LoadingCard aspectRatio={1.6} />
+            <LoadingCard aspectRatio={1.4} />
           </View>
         </View>
       </View>
     );
   }
 
-  // --- Main List UI ---
+  // --- Main render ---
   return (
-    <View style={{ paddingTop }} className="flex-1 bg-light-background dark:bg-dark-background">
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+    <View
+      style={{ paddingTop }}
+      className="flex-1 bg-light-background dark:bg-dark-background"
+    >
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+
       <Text className="px-4 pb-3 font-heading text-3xl text-light-text dark:text-dark-text">
         XeroCanvas
       </Text>
-      <FlatList
+
+      <FlashList<PixabayImage>
         data={wallpapers}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
+        masonry
         contentContainerStyle={{ paddingHorizontal: 4 }}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.8}
@@ -138,10 +183,10 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={isDark ? '#94A3B8' : '#64748B'}
+            tintColor={isDark ? "#94A3B8" : "#64748B"}
           />
         }
       />
     </View>
   );
-};
+}

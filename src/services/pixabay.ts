@@ -89,15 +89,25 @@ export const fetchWallpapers = async (
   }
 };
 
-// --- THIS IS THE CORRECTED FUNCTION ---
-// Get one preview image for a category
 export const fetchCategoryPreview = async (
   category: string
 ): Promise<PixabayImage | null> => {
   try {
-    // Use the category name as the search query 'q' for reliability
-    const response = await fetchWallpapers({ q: category, per_page: 1 });
-    return response.hits[0] || null;
+    // Fetch up to 10 popular images for the category
+    const response = await fetchWallpapers({
+      category: category, 
+      per_page: 10,
+      order: "popular",
+    });
+
+    // If we have results, pick a random one from the list
+    if (response && response.hits.length > 0) {
+      const randomIndex = Math.floor(Math.random() * response.hits.length);
+      return response.hits[randomIndex];
+    }
+
+    // Return null if no images were found
+    return null;
   } catch (error) {
     console.error("Failed to fetch category preview:", error);
     return null;

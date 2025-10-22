@@ -1,26 +1,35 @@
-// src/screens/CategoryDetailScreen.tsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, RefreshControl, ActivityIndicator, FlatList, TouchableOpacity, StatusBar, ListRenderItem } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import HapticFeedback from 'react-native-haptic-feedback';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { ArrowLeftIcon } from 'react-native-heroicons/outline';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+  StatusBar,
+} from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import HapticFeedback from "react-native-haptic-feedback";
+import { FlashList, ListRenderItem } from "@shopify/flash-list";
+import { ArrowLeftIcon } from "react-native-heroicons/outline";
 
 // Hooks, utils, and types
-import { useSafePadding } from '@hooks/useSafePadding';
-import { useTheme } from '@context/ThemeContext';
-import { fetchWallpapers, PixabayImage } from '@services/pixabay';
-import { AppNavigationProp, CategoryDetailScreenProps } from '@navigation/types';
+import { useSafePadding } from "@hooks/useSafePadding";
+import { useTheme } from "@context/ThemeContext";
+import { fetchWallpapers, PixabayImage } from "@services/pixabay";
+import {
+  AppNavigationProp,
+  CategoryDetailScreenProps,
+} from "@navigation/types";
 
 // Components
-import { WallpaperCard } from '@components/WallpaperCard';
-import { LoadingCard } from '@components/LoadingCard';
+import { WallpaperCard } from "@components/WallpaperCard";
+import { LoadingCard } from "@components/LoadingCard";
 
 export default function CategoryDetailScreen() {
   const { paddingTop } = useSafePadding();
   const { isDark } = useTheme();
   const navigation = useNavigation<AppNavigationProp>();
-  const route = useRoute<CategoryDetailScreenProps['route']>();
+  const route = useRoute<CategoryDetailScreenProps["route"]>();
   const { category } = route.params;
 
   const [wallpapers, setWallpapers] = useState<PixabayImage[]>([]);
@@ -30,22 +39,39 @@ export default function CategoryDetailScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const loadWallpapers = useCallback(async (pageNum: number = 1, append: boolean = false) => {
-    if (!append) setLoading(true);
-    try {
-      const data = await fetchWallpapers({ category, page: pageNum, order: 'popular' });
-      if (data.hits.length === 0) setHasMore(false);
-      setWallpapers(prev => (append ? [...prev, ...data.hits] : data.hits));
-    } catch (error) {
-      console.error('Error loading category wallpapers:', error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-      setRefreshing(false);
-    }
-  }, [category]);
-  
-  useEffect(() => { loadWallpapers(); }, [loadWallpapers]);
+  const loadWallpapers = useCallback(
+    async (pageNum: number = 1, append: boolean = false) => {
+      if (!append) {
+        setLoading(true);
+      }
+      try {
+        const data = await fetchWallpapers({
+          category,
+          page: pageNum,
+          order: "popular",
+        });
+
+        if (data.hits.length === 0) {
+          setHasMore(false);
+        }
+
+        setWallpapers((prev) =>
+          append ? [...prev, ...data.hits] : data.hits
+        );
+      } catch (error) {
+        console.error("Error loading category wallpapers:", error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        setRefreshing(false);
+      }
+    },
+    [category]
+  );
+
+  useEffect(() => {
+    loadWallpapers();
+  }, [loadWallpapers]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -63,50 +89,91 @@ export default function CategoryDetailScreen() {
   }, [loadingMore, hasMore, page, loadWallpapers]);
 
   const handleBack = () => {
-    HapticFeedback.trigger('impactLight');
+    HapticFeedback.trigger("impactLight");
     navigation.goBack();
   };
 
   const handleWallpaperPress = (wallpaper: PixabayImage) => {
-    navigation.push('Detail', { wallpaper: JSON.stringify(wallpaper) });
+    navigation.push("Detail", {
+      wallpaper: JSON.stringify(wallpaper),
+    });
   };
 
-  const renderItem: ListRenderItem<PixabayImage> = ({ item, index }) => (
-    <Animated.View className="flex-1 p-1.5" entering={FadeInDown.delay(index * 100).duration(400)}>
-      <WallpaperCard wallpaper={item} onPress={() => handleWallpaperPress(item)} />
-    </Animated.View>
-  );
-
-  const renderFooter = () => loadingMore ? <View className="py-8"><ActivityIndicator /></View> : null;
-
-  const LoadingState = () => (
-    <View className="mt-4 flex-row gap-x-3 px-4">
-      <View className="flex-1 gap-y-3"><LoadingCard aspectRatio={1.5} /><LoadingCard aspectRatio={1.2} /></View>
-      <View className="flex-1 gap-y-3"><LoadingCard aspectRatio={1.3} /><LoadingCard aspectRatio={1.6} /></View>
+  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => (
+    <View className="flex-1 p-1.5 mb-3">
+      <WallpaperCard
+        wallpaper={item}
+        onPress={() => handleWallpaperPress(item)}
+      />
     </View>
   );
 
+  const LoadingState = () => (
+    <View className="mt-4 flex-row gap-x-3 px-4">
+      <View className="flex-1 gap-y-3">
+        <LoadingCard aspectRatio={1.5} />
+        <LoadingCard aspectRatio={1.2} />
+      </View>
+      <View className="flex-1 gap-y-3">
+        <LoadingCard aspectRatio={1.3} />
+        <LoadingCard aspectRatio={1.6} />
+      </View>
+    </View>
+  );
+
+  const renderFooter = () =>
+    loadingMore ? (
+      <View className="py-8">
+        <ActivityIndicator
+          size="small"
+          color={isDark ? "white" : "gray"}
+        />
+      </View>
+    ) : null;
+
   return (
-    <View style={{ paddingTop }} className="flex-1 bg-light-background dark:bg-dark-background">
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      {/* Custom Header */}
+    <View
+      style={{ paddingTop }}
+      className="flex-1 bg-light-background dark:bg-dark-background"
+    >
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+
       <View className="flex-row items-center justify-between px-4 pb-4">
-        <TouchableOpacity onPress={handleBack} className="p-1"><ArrowLeftIcon size={24} className="text-light-text dark:text-dark-text" /></TouchableOpacity>
-        <Text className="font-heading text-xl capitalize text-light-text dark:text-dark-text">{category}</Text>
+        <TouchableOpacity
+          onPress={handleBack}
+          className="p-1 rounded-full active:opacity-70"
+        >
+          <ArrowLeftIcon
+            size={24}
+            className="text-light-text dark:text-dark-text"
+          />
+        </TouchableOpacity>
+        <Text className="font-heading text-xl capitalize text-light-text dark:text-dark-text">
+          {category}
+        </Text>
         <View className="w-6" />
       </View>
 
-      {loading ? <LoadingState /> : (
-        <FlatList
+      {loading ? (
+        <LoadingState />
+      ) : (
+        <FlashList<PixabayImage>
           data={wallpapers}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
+          masonry
           contentContainerStyle={{ paddingHorizontal: 4 }}
           onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.8}
+          onEndReachedThreshold={0.7}
           ListFooterComponent={renderFooter}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={isDark ? "white" : "black"}
+            />
+          }
         />
       )}
     </View>

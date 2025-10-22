@@ -4,8 +4,8 @@ import { View, Text, Image, TouchableOpacity, ActivityIndicator, StatusBar, Plat
 import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import HapticFeedback from 'react-native-haptic-feedback';
+import RNFS from 'react-native-fs';
 import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
-import ReactNativeBlobUtil from 'react-native-blob-util';
 import { ArrowLeftIcon, ShareIcon, ArrowDownTrayIcon, InformationCircleIcon } from 'react-native-heroicons/outline';
 
 // Hooks, utils, and types
@@ -30,35 +30,44 @@ export default function DetailScreen() {
     navigation.goBack();
   };
 
+  const requestAndroidPermission = async () => {
+    const version = parseInt(Platform.Version as string, 10);
+    const permission =
+      version >= 33
+        ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES // Android 13+
+        : PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE; // Android <= 12
+
+    const status = await request(permission);
+
+    if (status !== RESULTS.GRANTED) {
+      Alert.alert('Permission required', 'We need access to your gallery to save wallpapers.');
+      return false;
+    }
+    return true;
+  };
+
   const handleDownload = async () => {
     HapticFeedback.trigger('impactMedium');
-    const permission = Platform.OS === 'ios' ? PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY : PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE;
-    
+
+    if (!(await requestAndroidPermission())) return;
+
+    const imageUrl = wallpaper.largeImageURL || wallpaper.webformatURL;
+    const fileName = `XeroCanvas-${wallpaper.id}.jpg`;
+    const filePath = `${RNFS.PicturesDirectoryPath}/${fileName}`;
+
     try {
-      const status = await request(permission);
-      if (status !== RESULTS.GRANTED) {
-        Alert.alert('Permission required', 'We need access to your photo library to save wallpapers.');
-        return;
-      }
-
       setDownloading(true);
-      const imageUrl = wallpaper.largeImageURL || wallpaper.webformatURL;
-      
-      // Use react-native-blob-util to download and save the image
-      const res = await ReactNativeBlobUtil.config({
-        fileCache: true,
-        appendExt: 'jpg',
-      }).fetch('GET', imageUrl);
 
-      const path = res.path();
-      await ReactNativeBlobUtil.fs.cp(path, ReactNativeBlobUtil.fs.dirs.CacheDir + '/wallpaper.jpg');
-      await ReactNativeBlobUtil.fs.unlink(path);
+      // Download the image to Pictures folder
+      await RNFS.downloadFile({
+        fromUrl: imageUrl,
+        toFile: filePath,
+      }).promise;
 
-      await ReactNativeBlobUtil.fs.mv(ReactNativeBlobUtil.fs.dirs.CacheDir + '/wallpaper.jpg', ReactNativeBlobUtil.fs.dirs.PictureDir + `/XeroCanvas-${wallpaper.id}.jpg`);
-
+      // Save info to local storage
       const downloadedWallpaper: DownloadedWallpaper = {
         id: wallpaper.id.toString(),
-        localUri: `file://${ReactNativeBlobUtil.fs.dirs.PictureDir}/XeroCanvas-${wallpaper.id}.jpg`,
+        localUri: `file://${filePath}`,
         originalUrl: imageUrl,
         downloadedAt: new Date().toISOString(),
         metadata: {
@@ -72,7 +81,6 @@ export default function DetailScreen() {
 
       HapticFeedback.trigger('notificationSuccess');
       Alert.alert('Success', 'Wallpaper saved to your gallery!');
-
     } catch (error) {
       console.error('Download error:', error);
       Alert.alert('Error', 'Failed to download wallpaper.');

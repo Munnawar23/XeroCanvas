@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient'; 
-import HapticFeedback from 'react-native-haptic-feedback'; 
+import LinearGradient from 'react-native-linear-gradient';
+import HapticFeedback from 'react-native-haptic-feedback';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -48,7 +48,7 @@ export const CategoryCard = ({ category, imageUrl, onPress }: CategoryCardProps)
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        className="aspect-square overflow-hidden rounded-xl bg-light-card dark:bg-dark-card shadow-sm"
+        className="aspect-square overflow-hidden rounded-xl bg-card shadow-sm"
       >
         {imageUrl ? (
           <Image
@@ -58,7 +58,7 @@ export const CategoryCard = ({ category, imageUrl, onPress }: CategoryCardProps)
           />
         ) : (
           // Placeholder view if no image is available
-          <View className="h-full w-full bg-light-border dark:bg-dark-border" />
+          <View className="h-full w-full bg-border" />
         )}
 
         {/* Gradient overlay for text readability */}
@@ -66,7 +66,7 @@ export const CategoryCard = ({ category, imageUrl, onPress }: CategoryCardProps)
           colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
           className="absolute bottom-0 left-0 right-0 h-2/3 justify-end p-3"
         >
-          <Text 
+          <Text
             className="text-center font-heading text-lg text-white"
             numberOfLines={1}
           >

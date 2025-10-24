@@ -1,12 +1,11 @@
-// src/navigation/RootNavigator.tsx
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 
-import SplashScreen from "@screens/SplashScreen";
+import SplashScreen from "@screens/Splash/SplashScreen";
 import MainTabNavigator from "@navigation/TabNavigator";
-import CategoryDetailScreen from "@screens/CategoryDetailScreen";
-import DetailScreen from "@screens/DetailScreen"; // <-- 1. IMPORT THE DETAIL SCREEN
+import CategoryDetailScreen from "@screens/Category/components/CategoryDetailScreen";
+import WallpaperScreen from "@screens/Wallpaper/WallpaperScreen"; // Renamed import
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -27,7 +26,7 @@ export default function RootStackNavigator() {
         
         {/* Screens that are pushed on top of the main flow */}
         <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
-        <Stack.Screen name="Detail" component={DetailScreen} /> 
+        <Stack.Screen name="Detail" component={WallpaperScreen} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );

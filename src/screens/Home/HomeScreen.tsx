@@ -11,16 +11,15 @@ import { FlashList, ListRenderItem } from "@shopify/flash-list";
 
 // Hooks, services, and types
 import { useSafePadding } from "@hooks/useSafePadding";
-import { useTheme } from "@context/ThemeContext";
-import { fetchWallpapers, PixabayImage } from "@services/pixabay";
+import { fetchWallpapers, PixabayImage } from "@api/index";
 import { storage } from "@utils/storage";
 import { AppNavigationProp } from "@navigation/types";
 
 // Components
-import { WallpaperCard } from "@components/WallpaperCard";
-import { LoadingCard } from "@components/LoadingCard";
+import { WallpaperCard } from "@components/common/WallpaperCard";
+import { LoadingCard } from "@components/common/LoadingCard";
 
-// ✅ Define the expected type from the API/cache
+// Define the expected type from the API/cache
 type PixabayResponse = {
   hits: PixabayImage[];
   total: number;
@@ -29,7 +28,6 @@ type PixabayResponse = {
 
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigationProp>();
-  const { isDark } = useTheme();
   const { paddingTop } = useSafePadding();
 
   const [wallpapers, setWallpapers] = useState<PixabayImage[]>([]);
@@ -51,22 +49,16 @@ export default function HomeScreen() {
 
       try {
         const cacheKey = `wallpapers_page_${pageNum}`;
-        
-        // --- FIX STARTS HERE ---
-        // Assert the type of 'data' to what we expect from the cache or API
         let data = (await storage.getCache(cacheKey)) as PixabayResponse | null;
-        // --- FIX ENDS HERE ---
 
         if (!data) {
           data = await fetchWallpapers({ page: pageNum, order: "popular" });
           await storage.setCache(cacheKey, data);
         }
 
-        // Add a safety check to ensure data and data.hits exist before using them
         if (data && data.hits) {
-            if (data.hits.length === 0) setHasMore(false);
-
-            setWallpapers((prev) => (append ? [...prev, ...data.hits] : data.hits));
+          if (data.hits.length === 0) setHasMore(false);
+          setWallpapers((prev) => (append ? [...prev, ...data.hits] : data.hits));
         }
 
       } catch (error) {
@@ -122,10 +114,7 @@ export default function HomeScreen() {
     if (!loadingMore) return null;
     return (
       <View className="py-8">
-        <ActivityIndicator
-          size="small"
-          color={isDark ? "#94A3B8" : "#64748B"}
-        />
+        <ActivityIndicator size="small" color="#64748B" />
       </View>
     );
   };
@@ -135,10 +124,10 @@ export default function HomeScreen() {
     return (
       <View
         style={{ paddingTop }}
-        className="flex-1 bg-light-background dark:bg-dark-background px-4"
+        className="flex-1 bg-background px-4"
       >
-        <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
-        <Text className="font-heading text-3xl text-light-text dark:text-dark-text">
+        <StatusBar barStyle="dark-content" />
+        <Text className="font-heading text-3xl text-text">
           XeroCanvas
         </Text>
         <View className="mt-4 flex-row gap-x-3">
@@ -161,11 +150,11 @@ export default function HomeScreen() {
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-light-background dark:bg-dark-background"
+      className="flex-1 bg-background"
     >
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle="dark-content" />
 
-      <Text className="px-4 pb-3 font-heading text-3xl text-light-text dark:text-dark-text">
+      <Text className="px-4 pb-3 font-heading text-3xl text-text">
         XeroCanvas
       </Text>
 
@@ -183,7 +172,7 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={isDark ? "#94A3B8" : "#64748B"}
+            tintColor="#64748B"
           />
         }
       />

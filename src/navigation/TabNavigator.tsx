@@ -1,12 +1,10 @@
 import React from "react";
-import { useColorScheme } from "nativewind";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-import HomeScreen from "@screens/HomeScreen";
-import CategoryScreen from "@screens/CategoryScreen";
-import SearchScreen from "@screens/SearchScreen";
-import DownloadsScreen from "@screens/DownloadsScreen";
-import SettingsScreen from "@screens/SettingsScreen";
+import HomeScreen from "@screens/Home/HomeScreen";
+import CategoryScreen from "@screens/Category/CategoryScreen";
+import SearchScreen from "@screens/Search/SearchScreen";
+import DownloadsScreen from "@screens/Downloads/DownloadsScreen";
 
 // Heroicons
 import {
@@ -20,15 +18,14 @@ import {
 const Tab = createBottomTabNavigator();
 
 export default function MainTabNavigator() {
-  const { colorScheme } = useColorScheme();
-
+  // Static styles for the light theme
   const tabBarStyle = {
-    backgroundColor: colorScheme === "dark" ? "#1E293B" : "#FFFFFF",
-    borderTopColor: colorScheme === "dark" ? "#334155" : "#E5E7EB",
+    backgroundColor: "#FFFFFF", // from theme.colors.card
+    borderTopColor: "#E5E7EB", // from theme.colors.border
   };
 
-  const activeTint = colorScheme === "dark" ? "#60A5FA" : "#3B82F6";
-  const inactiveTint = colorScheme === "dark" ? "#94A3B8" : "#64748B";
+  const activeTint = "#3B82F6"; // from theme.colors.accent
+  const inactiveTint = "#64748B"; // from theme.colors.subtext
 
   return (
     <Tab.Navigator
@@ -50,11 +47,8 @@ export default function MainTabNavigator() {
             case "Search":
               icon = <MagnifyingGlassIcon color={color} size={size} />;
               break;
-            case "Download":
+            case "Downloads": // Corrected name to match screen
               icon = <ArrowDownTrayIcon color={color} size={size} />;
-              break;
-            case "Settings":
-              icon = <Cog6ToothIcon color={color} size={size} />;
               break;
           }
 
@@ -66,7 +60,6 @@ export default function MainTabNavigator() {
       <Tab.Screen name="Category" component={CategoryScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Downloads" component={DownloadsScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }

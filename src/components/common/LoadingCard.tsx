@@ -38,7 +38,7 @@ export const LoadingCard = ({ aspectRatio = 1.5 }: LoadingCardProps) => {
   return (
     <Animated.View
       style={[{ aspectRatio }, animatedStyle]}
-      className="w-full rounded-xl bg-light-card dark:bg-dark-card"
+      className="w-full rounded-xl bg-card"
     />
   );
 };

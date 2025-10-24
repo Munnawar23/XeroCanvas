@@ -28,6 +28,8 @@ module.exports = {
           '@services': './src/services',
           '@types': './src/types',
           '@context': './src/context',
+          '@helpers': './src/helpers',
+          '@api': './src/api',
         },
       },
     ],

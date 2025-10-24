@@ -14,20 +14,18 @@ import { ArrowLeftIcon } from "react-native-heroicons/outline";
 
 // Hooks, utils, and types
 import { useSafePadding } from "@hooks/useSafePadding";
-import { useTheme } from "@context/ThemeContext";
-import { fetchWallpapers, PixabayImage } from "@services/pixabay";
+import { fetchWallpapers, PixabayImage } from "@api/index";
 import {
   AppNavigationProp,
   CategoryDetailScreenProps,
 } from "@navigation/types";
 
 // Components
-import { WallpaperCard } from "@components/WallpaperCard";
-import { LoadingCard } from "@components/LoadingCard";
+import { WallpaperCard } from "@components/common/WallpaperCard";
+import { LoadingCard } from "@components/common/LoadingCard";
 
 export default function CategoryDetailScreen() {
   const { paddingTop } = useSafePadding();
-  const { isDark } = useTheme();
   const navigation = useNavigation<AppNavigationProp>();
   const route = useRoute<CategoryDetailScreenProps["route"]>();
   const { category } = route.params;
@@ -124,31 +122,25 @@ export default function CategoryDetailScreen() {
   const renderFooter = () =>
     loadingMore ? (
       <View className="py-8">
-        <ActivityIndicator
-          size="small"
-          color={isDark ? "white" : "gray"}
-        />
+        <ActivityIndicator size="small" color="gray" />
       </View>
     ) : null;
 
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-light-background dark:bg-dark-background"
+      className="flex-1 bg-background"
     >
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle="dark-content" />
 
       <View className="flex-row items-center justify-between px-4 pb-4">
         <TouchableOpacity
           onPress={handleBack}
           className="p-1 rounded-full active:opacity-70"
         >
-          <ArrowLeftIcon
-            size={24}
-            className="text-light-text dark:text-dark-text"
-          />
+          <ArrowLeftIcon size={24} className="text-text" />
         </TouchableOpacity>
-        <Text className="font-heading text-xl capitalize text-light-text dark:text-dark-text">
+        <Text className="font-heading text-xl capitalize text-text">
           {category}
         </Text>
         <View className="w-6" />
@@ -171,7 +163,7 @@ export default function CategoryDetailScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={isDark ? "white" : "black"}
+              tintColor="black"
             />
           }
         />

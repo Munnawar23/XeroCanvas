@@ -9,15 +9,13 @@ import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 import { ArrowLeftIcon, ShareIcon, ArrowDownTrayIcon, InformationCircleIcon } from 'react-native-heroicons/outline';
 
 // Hooks, utils, and types
-import { useTheme } from '@context/ThemeContext';
 import { storage, DownloadedWallpaper } from '@utils/storage';
 import { AppNavigationProp, DetailScreenProps } from '@navigation/types';
 
 // Components
-import { InfoModal } from '@components/InfoModal';
+import { InfoModal } from '@screens/Downloads/components/InfoModal';
 
-export default function DetailScreen() {
-  const { isDark } = useTheme();
+export default function WallpaperScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const route = useRoute<DetailScreenProps['route']>();
   const wallpaper = JSON.parse(route.params.wallpaper);
@@ -113,7 +111,7 @@ export default function DetailScreen() {
           <TouchableOpacity onPress={() => setShowInfo(true)} className="h-14 w-14 items-center justify-center rounded-full bg-white/20">
             <InformationCircleIcon size={28} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleDownload} disabled={downloading} className="flex-1 flex-row items-center justify-center gap-x-3 rounded-full bg-light-accent py-4 dark:bg-dark-accent">
+          <TouchableOpacity onPress={handleDownload} disabled={downloading} className="flex-1 flex-row items-center justify-center gap-x-3 rounded-full bg-accent py-4">
             {downloading ? (
               <ActivityIndicator color="white" />
             ) : (

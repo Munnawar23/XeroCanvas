@@ -3,19 +3,17 @@ import { View, Text, Alert, StatusBar } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import HapticFeedback from "react-native-haptic-feedback";
 import { FlashList, ListRenderItem } from "@shopify/flash-list";
-import LottieView from "lottie-react-native"; // ✅ Import Lottie
+import LottieView from "lottie-react-native";
 
 // Hooks, utils, and types
 import { useSafePadding } from "@hooks/useSafePadding";
-import { useTheme } from "@context/ThemeContext";
 import { storage, DownloadedWallpaper } from "@utils/storage";
 
 // Components
-import { DownloadedWallpaperCard } from "@components/DownloadedWallpaperCard";
+import { DownloadedWallpaperCard } from "@screens/Downloads/components/DownloadedWallpaperCard";
 
 export default function DownloadsScreen() {
   const { paddingTop } = useSafePadding();
-  const { isDark } = useTheme();
   const [downloads, setDownloads] = React.useState<DownloadedWallpaper[]>([]);
   const isFocused = useIsFocused();
 
@@ -60,18 +58,16 @@ export default function DownloadsScreen() {
 
   const EmptyState = () => (
     <View className="flex-1 items-center justify-center space-y-3 px-8">
-      {/* --- MODIFICATION START --- */}
       <LottieView
         source={require("@assets/animations/empty.json")}
         autoPlay
         loop
-        style={{ width: 300, height: 300 }} // Adjust size as needed
+        style={{ width: 300, height: 300 }}
       />
-      {/* --- MODIFICATION END --- */}
-      <Text className="font-heading text-xl text-light-text dark:text-dark-text">
+      <Text className="font-heading text-xl text-text">
         No Downloads Yet
       </Text>
-      <Text className="text-center font-body text-light-subtext dark:text-dark-subtext">
+      <Text className="text-center font-body text-subtext">
         Wallpapers you save will appear here for you to view and manage.
       </Text>
     </View>
@@ -80,11 +76,11 @@ export default function DownloadsScreen() {
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-light-background dark:bg-dark-background"
+      className="flex-1 bg-background"
     >
-
+      <StatusBar barStyle="dark-content" />
       <View className="px-4 pb-4">
-        <Text className="font-heading text-3xl text-light-text dark:text-dark-text">
+        <Text className="font-heading text-3xl text-text">
           My Downloads
         </Text>
       </View>

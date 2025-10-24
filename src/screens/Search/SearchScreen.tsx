@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
   ActivityIndicator,
-  RefreshControl, // ✅ Import RefreshControl
+  RefreshControl,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import HapticFeedback from "react-native-haptic-feedback";
@@ -20,15 +20,14 @@ import LottieView from "lottie-react-native";
 
 // Hooks, utils, and types
 import { useSafePadding } from "@hooks/useSafePadding";
-import { useTheme } from "@context/ThemeContext";
-import { fetchWallpapers, PixabayImage } from "@services/pixabay";
+import { fetchWallpapers, PixabayImage } from "@api/index";
 import { storage } from "@utils/storage";
 import { AppNavigationProp } from "@navigation/types";
 
 // Components
-import { FilterModal, FilterState } from "@components/FilterModal";
-import { WallpaperCard } from "@components/WallpaperCard";
-import { LoadingCard } from "@components/LoadingCard";
+import { FilterModal, FilterState } from "@screens/Search/components/FilterModal";
+import { WallpaperCard } from "@components/common/WallpaperCard";
+import { LoadingCard } from "@components/common/LoadingCard";
 
 const debounce = (func: Function, wait: number) => {
   let timeout: ReturnType<typeof setTimeout>;
@@ -40,7 +39,6 @@ const debounce = (func: Function, wait: number) => {
 
 export default function SearchScreen() {
   const { paddingTop } = useSafePadding();
-  const { isDark } = useTheme();
   const navigation = useNavigation<AppNavigationProp>();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,15 +51,14 @@ export default function SearchScreen() {
     order: "popular",
   });
 
-  // --- State for pagination & refresh ---
+  // State for pagination & refresh
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // ✅ Refresh state
+  const [refreshing, setRefreshing] = useState(false);
 
   const hasSearched = useRef(false);
 
-  /** 🔍 Fetch wallpapers from Pixabay (Updated for pagination) */
   const performSearch = async (
     query: string,
     currentFilters: FilterState,
@@ -106,11 +103,10 @@ export default function SearchScreen() {
     } finally {
       setLoading(false);
       setLoadingMore(false);
-      setRefreshing(false); // ✅ Stop refreshing indicator
+      setRefreshing(false);
     }
   };
 
-  /** 🚀 Start a new search (resets pagination) */
   const startNewSearch = (query: string, currentFilters: FilterState) => {
     setPage(1);
     setHasMore(true);
@@ -118,7 +114,6 @@ export default function SearchScreen() {
     performSearch(query, currentFilters, 1, false);
   };
 
-  /** ⏳ Debounced search */
   const debouncedSearch = useCallback(
     debounce((query: string, currentFilters: FilterState) => {
       startNewSearch(query, currentFilters);
@@ -132,25 +127,21 @@ export default function SearchScreen() {
     }
   }, [searchQuery, filters, debouncedSearch]);
 
-  /** 🔄 Pull to refresh handler */
   const handleRefresh = useCallback(() => {
     if (!searchQuery.trim()) {
-        setRefreshing(false)
-        return
-    };
+      setRefreshing(false);
+      return;
+    }
     setRefreshing(true);
     setPage(1);
     setHasMore(true);
     performSearch(searchQuery, filters, 1, false);
   }, [searchQuery, filters]);
 
-
-  /** 🎛 Apply filters */
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
   };
 
-  /** ❌ Clear search input */
   const handleClearSearch = () => {
     HapticFeedback.trigger("impactLight");
     setSearchQuery("");
@@ -160,7 +151,6 @@ export default function SearchScreen() {
     hasSearched.current = false;
   };
 
-  /** ⏬ Load more results on scroll */
   const handleLoadMore = useCallback(() => {
     if (loadingMore || !hasMore || !searchQuery.trim()) return;
     const nextPage = page + 1;
@@ -168,14 +158,12 @@ export default function SearchScreen() {
     performSearch(searchQuery, filters, nextPage, true);
   }, [loadingMore, hasMore, page, searchQuery, filters]);
 
-  /** 🖼 Navigate to wallpaper detail */
   const handleWallpaperPress = (wallpaper: PixabayImage) => {
     navigation.navigate("Detail", {
       wallpaper: JSON.stringify(wallpaper),
     });
   };
 
-  /** 📱 Render single wallpaper item */
   const renderItem: ListRenderItem<PixabayImage> = ({ item }) => (
     <View className="flex-1 p-1.5 mb-3">
       <WallpaperCard
@@ -185,7 +173,6 @@ export default function SearchScreen() {
     </View>
   );
 
-  /** 🧩 Loading skeletons */
   const LoadingState = () => (
     <View className="mt-4 flex-row gap-x-3 px-4">
       <View className="flex-1 gap-y-3">
@@ -199,7 +186,6 @@ export default function SearchScreen() {
     </View>
   );
 
-  /** 🚫 Empty state */
   const EmptyState = () => (
     <View className="flex-1 items-center justify-center space-y-3 px-8">
       <LottieView
@@ -208,12 +194,12 @@ export default function SearchScreen() {
         loop
         style={{ width: 250, height: 250 }}
       />
-      <Text className="font-heading text-xl text-light-text dark:text-dark-text">
+      <Text className="font-heading text-xl text-text">
         {hasSearched.current && searchQuery.length > 0
           ? "No Results Found"
           : "Find Your Next Wallpaper"}
       </Text>
-      <Text className="text-center font-body text-light-subtext dark:text-dark-subtext">
+      <Text className="text-center font-body text-subtext">
         {hasSearched.current && searchQuery.length > 0
           ? "Try a different keyword or adjust your filters."
           : "Search for anything you can imagine."}
@@ -221,15 +207,11 @@ export default function SearchScreen() {
     </View>
   );
 
-  /** 🦶 Footer loader */
   const renderFooter = () => {
     if (!loadingMore) return null;
     return (
       <View className="py-8">
-        <ActivityIndicator
-          size="small"
-          color={isDark ? "#94A3B8" : "#64748B"}
-        />
+        <ActivityIndicator size="small" color="#64748B" />
       </View>
     );
   };
@@ -237,45 +219,38 @@ export default function SearchScreen() {
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-light-background dark:bg-dark-background"
+      className="flex-1 bg-background"
     >
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle="dark-content" />
 
-      {/* 🔎 Search Bar */}
+      {/* Search Bar */}
       <View className="flex-row items-center gap-x-2 px-4 pb-3">
-        <View className="flex-1 flex-row items-center rounded-xl bg-light-card p-3 dark:bg-dark-card">
-          <MagnifyingGlassIcon
-            size={20}
-            className="text-light-subtext dark:text-dark-subtext"
-          />
+        <View className="flex-1 flex-row items-center rounded-xl bg-card p-3">
+          <MagnifyingGlassIcon size={20} className="text-subtext" />
           <TextInput
             placeholder="Search..."
-            placeholderTextColor={isDark ? "#94A3B8" : "#64748B"}
+            placeholderTextColor="#64748B"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            className="flex-1 px-2 font-body text-base text-light-text dark:text-dark-text"
+            className="flex-1 px-2 font-body text-base text-text"
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={handleClearSearch}>
-              <XMarkIcon
-                size={20}
-                className="text-light-subtext dark:text-dark-subtext"
-              />
+              <XMarkIcon size={20} className="text-subtext" />
             </TouchableOpacity>
           )}
         </View>
 
-        {/* ⚙️ Filter Button */}
+        {/* Filter Button */}
         <TouchableOpacity
           onPress={() => setShowFilters(true)}
-          className="rounded-xl bg-light-accent p-3 dark:bg-dark-accent"
+          className="rounded-xl bg-accent p-3"
         >
           <AdjustmentsHorizontalIcon size={24} color="white" />
         </TouchableOpacity>
       </View>
 
-      {/* 🧱 Masonry Grid */}
-      {/* ✅ Updated logic to prevent skeleton on refresh */}
+      {/* Masonry Grid */}
       {loading && !refreshing ? (
         <LoadingState />
       ) : wallpapers.length > 0 ? (
@@ -289,12 +264,11 @@ export default function SearchScreen() {
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.8}
           ListFooterComponent={renderFooter}
-          // ✅ Add RefreshControl component
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={isDark ? "#94A3B8" : "#64748B"}
+              tintColor="#64748B"
             />
           }
         />
@@ -302,7 +276,7 @@ export default function SearchScreen() {
         <EmptyState />
       )}
 
-      {/* 🪄 Filter Modal */}
+      {/* Filter Modal */}
       <FilterModal
         visible={showFilters}
         onClose={() => setShowFilters(false)}

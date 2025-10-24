@@ -19,7 +19,7 @@ export const DownloadedWallpaperCard = ({ item, onDelete }: DownloadedCardProps)
       <Image
         source={{ uri: item.localUri }}
         // Using a common aspect ratio for consistency
-        className="w-full aspect-[3/4] rounded-xl bg-light-border dark:bg-dark-border"
+        className="w-full aspect-[3/4] rounded-xl bg-border"
         resizeMode="cover"
       />
       {/* Dark overlay at the bottom for text readability */}

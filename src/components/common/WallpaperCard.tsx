@@ -7,7 +7,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { ArrowDownTrayIcon } from 'react-native-heroicons/solid';
-import { PixabayImage } from '@services/pixabay'; 
+import { PixabayImage } from '@api/index';
 
 type WallpaperCardProps = {
   wallpaper: PixabayImage;

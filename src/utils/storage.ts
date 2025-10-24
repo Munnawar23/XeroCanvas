@@ -1,14 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// --- Types ---
-
-export type ThemeMode = 'light' | 'dark' | 'system';
-
 export type DownloadedWallpaper = {
-  id: string;           // Image ID
-  localUri: string;     // Local file path
-  originalUrl: string;  // Original remote URL
-  downloadedAt: string; // Download time
+  id: string;           
+  localUri: string;     
+  originalUrl: string;  
+  downloadedAt: string; 
   metadata: {
     tags: string;
     user: string;
@@ -16,42 +12,15 @@ export type DownloadedWallpaper = {
   };
 };
 
-export type UserPreferences = {
-  gridColumns: 2 | 3;
-  imageQuality: 'medium' | 'high';
-  safeSearch: boolean;
-};
-
 // --- Storage Keys ---
 const KEYS = {
-  THEME_MODE: 'theme_mode',
   DOWNLOADS: 'downloads',
   SEARCH_HISTORY: 'search_history',
-  PREFERENCES: 'user_preferences',
   CACHE_PREFIX: 'cache_',
 };
 
 // --- Storage Helper ---
 export const storage = {
-  // --- Theme ---
-  async getThemeMode(): Promise<ThemeMode> {
-    try {
-      const mode = await AsyncStorage.getItem(KEYS.THEME_MODE);
-      return (mode as ThemeMode) || 'system';
-    } catch (error) {
-      console.error('getThemeMode error:', error);
-      return 'system';
-    }
-  },
-
-  async setThemeMode(mode: ThemeMode): Promise<void> {
-    try {
-      await AsyncStorage.setItem(KEYS.THEME_MODE, mode);
-    } catch (error) {
-      console.error('setThemeMode error:', error);
-    }
-  },
-
   // --- Downloads ---
   async getDownloads(): Promise<DownloadedWallpaper[]> {
     try {
@@ -102,32 +71,6 @@ export const storage = {
       await AsyncStorage.setItem(KEYS.SEARCH_HISTORY, JSON.stringify(updated));
     } catch (error) {
       console.error('addSearchHistory error:', error);
-    }
-  },
-
-  // --- Preferences ---
-  async getPreferences(): Promise<UserPreferences> {
-    const defaults: UserPreferences = {
-      gridColumns: 2,
-      imageQuality: 'high',
-      safeSearch: true,
-    };
-    try {
-      const jsonValue = await AsyncStorage.getItem(KEYS.PREFERENCES);
-      return jsonValue ? { ...defaults, ...JSON.parse(jsonValue) } : defaults;
-    } catch (error) {
-      console.error('getPreferences error:', error);
-      return defaults;
-    }
-  },
-
-  async setPreferences(preferences: Partial<UserPreferences>): Promise<void> {
-    try {
-      const current = await this.getPreferences();
-      const updated = { ...current, ...preferences };
-      await AsyncStorage.setItem(KEYS.PREFERENCES, JSON.stringify(updated));
-    } catch (error) {
-      console.error('setPreferences error:', error);
     }
   },
 

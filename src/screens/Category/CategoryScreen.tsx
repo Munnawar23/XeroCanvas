@@ -5,20 +5,18 @@ import { FlashList } from "@shopify/flash-list";
 
 // Hooks, utils, and types
 import { useSafePadding } from "@hooks/useSafePadding";
-import { useTheme } from "@context/ThemeContext";
-import { CATEGORIES, fetchCategoryPreview } from "@services/pixabay";
+import { CATEGORIES, fetchCategoryPreview } from "@api/index";
 import { storage } from "@utils/storage";
 import { AppNavigationProp } from "@navigation/types";
 
 // Components
-import { CategoryCard } from "@components/CategoryCard";
-import { LoadingCard } from "@components/LoadingCard";
+import { CategoryCard } from "@screens/Category/components/CategoryCard";
+import { LoadingCard } from "@components/common/LoadingCard";
 
 type CategoryWithImage = { name: string; imageUrl: string | null };
 
 export default function CategoryScreen() {
   const { paddingTop } = useSafePadding();
-  const { isDark } = useTheme();
   const navigation = useNavigation<AppNavigationProp>();
 
   const [categories, setCategories] = useState<CategoryWithImage[]>([]);
@@ -79,11 +77,11 @@ export default function CategoryScreen() {
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-light-background dark:bg-dark-background"
+      className="flex-1 bg-background"
     >
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle="dark-content" />
       <View className="px-4 pb-4">
-        <Text className="font-heading text-3xl text-light-text dark:text-dark-text">
+        <Text className="font-heading text-3xl text-text">
           Categories
         </Text>
       </View>

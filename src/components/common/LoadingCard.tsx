@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,36 +10,33 @@ import Animated, {
 } from 'react-native-reanimated';
 
 type LoadingCardProps = {
-  aspectRatio?: number;
+  aspectRatio?: number; // width / height ratio
 };
 
 export const LoadingCard = ({ aspectRatio = 1.5 }: LoadingCardProps) => {
-  // Shared value to drive the shimmer animation
   const opacity = useSharedValue(0.4);
 
-  // Looping animation effect
   useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
-        // Animate from 0.4 to 0.8 opacity...
         withTiming(0.8, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-        // ...and back to 0.4
         withTiming(0.4, { duration: 800, easing: Easing.inOut(Easing.ease) })
       ),
-      -1, // -1 means infinite loop
-      true // Reverse the animation on each repetition
+      -1,
+      true
     );
   }, []);
 
-  // Animated style that applies the changing opacity
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
   }));
 
   return (
-    <Animated.View
-      style={[{ aspectRatio }, animatedStyle]}
-      className="w-full rounded-xl bg-card"
-    />
+    <View className="w-full rounded-xl overflow-hidden">
+      <Animated.View
+        style={[{ aspectRatio }, animatedStyle]}
+        className="w-full bg-gray-300 rounded-xl"
+      />
+    </View>
   );
 };

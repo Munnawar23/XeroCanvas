@@ -1,6 +1,4 @@
-// src/services/pixabay.ts
-
-const PIXABAY_API_KEY = '40924902-a978992cc18cb9f4ba1b78d46';
+import { PIXABAY_API_KEY } from '@env'; 
 const PIXABAY_BASE_URL = "https://pixabay.com/api/";
 
 // Wallpaper categories
@@ -53,8 +51,6 @@ export type FetchWallpapersParams = {
 };
 
 // --- API Functions ---
-
-// Get wallpapers from Pixabay
 export const fetchWallpapers = async (
   params: FetchWallpapersParams = {}
 ): Promise<PixabayResponse> => {
@@ -93,20 +89,15 @@ export const fetchCategoryPreview = async (
   category: string
 ): Promise<PixabayImage | null> => {
   try {
-    // Fetch up to 10 popular images for the category
     const response = await fetchWallpapers({
       category: category, 
       per_page: 10,
       order: "popular",
     });
-
-    // If we have results, pick a random one from the list
     if (response && response.hits.length > 0) {
       const randomIndex = Math.floor(Math.random() * response.hits.length);
       return response.hits[randomIndex];
     }
-
-    // Return null if no images were found
     return null;
   } catch (error) {
     console.error("Failed to fetch category preview:", error);

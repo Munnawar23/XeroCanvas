@@ -15,10 +15,7 @@ type WallpaperCardProps = {
 };
 
 export const WallpaperCard = ({ wallpaper, onPress }: WallpaperCardProps) => {
-  // Shared value for the press animation
   const scale = useSharedValue(1);
-
-  // Animated style for a springy press effect
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
@@ -35,7 +32,6 @@ export const WallpaperCard = ({ wallpaper, onPress }: WallpaperCardProps) => {
     onPress();
   };
 
-  // Calculate aspect ratio from the image data
   const aspectRatio = wallpaper.imageWidth / wallpaper.imageHeight;
 
   return (
@@ -47,7 +43,7 @@ export const WallpaperCard = ({ wallpaper, onPress }: WallpaperCardProps) => {
       >
         <Image
           source={{ uri: wallpaper.webformatURL }}
-          style={{ aspectRatio }} // Apply dynamic aspect ratio
+          style={{ aspectRatio }} 
           className="w-full rounded-xl"
           resizeMode="cover"
         />

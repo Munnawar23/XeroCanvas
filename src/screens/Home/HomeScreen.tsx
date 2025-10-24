@@ -1,93 +1,35 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
   RefreshControl,
-  ActivityIndicator,
   StatusBar,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList, ListRenderItem } from "@shopify/flash-list";
 
-// Hooks, services, and types
+// Hooks, types, and components
 import { useSafePadding } from "@hooks/useSafePadding";
-import { fetchWallpapers, PixabayImage } from "@api/index";
-import { storage } from "@utils/storage";
+import { useWallpapers } from "@hooks/useWallpapers";
+import { PixabayImage } from "@api/index";
 import { AppNavigationProp } from "@navigation/types";
-
-// Components
 import { WallpaperCard } from "@components/common/WallpaperCard";
-import { LoadingCard } from "@components/common/LoadingCard";
-
-// Define the expected type from the API/cache
-type PixabayResponse = {
-  hits: PixabayImage[];
-  total: number;
-  totalHits: number;
-};
+import { LoadingState } from "@components/layout/LoadingState";
+import { ErrorState } from "@components/layout/ErrorState";
+import { ListFooter } from "@components/layout/ListFooter"; 
 
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const { paddingTop } = useSafePadding();
-
-  const [wallpapers, setWallpapers] = useState<PixabayImage[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-
-  // Initial load
-  useEffect(() => {
-    loadWallpapers();
-  }, []);
-
-  // --- Load wallpapers with caching support ---
-  const loadWallpapers = useCallback(
-    async (pageNum: number = 1, append: boolean = false) => {
-      if (!append) setLoading(true);
-
-      try {
-        const cacheKey = `wallpapers_page_${pageNum}`;
-        let data = (await storage.getCache(cacheKey)) as PixabayResponse | null;
-
-        if (!data) {
-          data = await fetchWallpapers({ page: pageNum, order: "popular" });
-          await storage.setCache(cacheKey, data);
-        }
-
-        if (data && data.hits) {
-          if (data.hits.length === 0) setHasMore(false);
-          setWallpapers((prev) => (append ? [...prev, ...data.hits] : data.hits));
-        }
-
-      } catch (error) {
-        console.error("Failed to load wallpapers:", error);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-        setRefreshing(false);
-      }
-    },
-    []
-  );
-
-  // --- Pull to refresh ---
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    setPage(1);
-    setHasMore(true);
-    loadWallpapers(1, false);
-  }, [loadWallpapers]);
-
-  // --- Load more when scrolled to end ---
-  const handleLoadMore = useCallback(() => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    const nextPage = page + 1;
-    setPage(nextPage);
-    loadWallpapers(nextPage, true);
-  }, [loadingMore, hasMore, page, loadWallpapers]);
+  const {
+    wallpapers,
+    loading,
+    loadingMore,
+    refreshing,
+    error,
+    handleRefresh,
+    handleLoadMore,
+  } = useWallpapers();
 
   // --- Navigate to wallpaper detail ---
   const handleWallpaperPress = useCallback(
@@ -109,51 +51,25 @@ export default function HomeScreen() {
     </View>
   );
 
-  // --- Footer loader ---
-  const renderFooter = () => {
-    if (!loadingMore) return null;
-    return (
-      <View className="py-8">
-        <ActivityIndicator size="small" color="#64748B" />
-      </View>
-    );
-  };
-
-  // --- Loading skeleton ---
   if (loading) {
-    return (
-      <View
-        style={{ paddingTop }}
-        className="flex-1 bg-background px-4"
-      >
-        <StatusBar barStyle="dark-content" />
-        <Text className="font-heading text-3xl text-text">
-          XeroCanvas
-        </Text>
-        <View className="mt-4 flex-row gap-x-3">
-          <View className="flex-1 gap-y-3">
-            <LoadingCard aspectRatio={1.5} />
-            <LoadingCard aspectRatio={1.2} />
-            <LoadingCard aspectRatio={1.8} />
-          </View>
-          <View className="flex-1 gap-y-3">
-            <LoadingCard aspectRatio={1.3} />
-            <LoadingCard aspectRatio={1.6} />
-            <LoadingCard aspectRatio={1.4} />
-          </View>
-        </View>
-      </View>
-    );
+    return <LoadingState paddingTop={paddingTop} />;
   }
 
-  // --- Main render ---
+  if (error && wallpapers.length === 0) {
+    return (
+      <ErrorState
+        paddingTop={paddingTop}
+        errorMessage={error}
+        onRetry={handleRefresh}
+      />
+    );
+  }
   return (
     <View
       style={{ paddingTop }}
       className="flex-1 bg-background"
     >
       <StatusBar barStyle="dark-content" />
-
       <Text className="px-4 pb-3 font-heading text-3xl text-text">
         XeroCanvas
       </Text>
@@ -166,8 +82,8 @@ export default function HomeScreen() {
         masonry
         contentContainerStyle={{ paddingHorizontal: 4 }}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.8}
-        ListFooterComponent={renderFooter}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={<ListFooter loadingMore={loadingMore} />}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

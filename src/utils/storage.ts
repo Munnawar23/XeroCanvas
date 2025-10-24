@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type DownloadedWallpaper = {
-  id: string;           
-  localUri: string;     
-  originalUrl: string;  
-  downloadedAt: string; 
+  id: string;
+  localUri: string;
+  originalUrl: string;
+  downloadedAt: string;
   metadata: {
     tags: string;
     user: string;
@@ -15,7 +15,6 @@ export type DownloadedWallpaper = {
 // --- Storage Keys ---
 const KEYS = {
   DOWNLOADS: 'downloads',
-  SEARCH_HISTORY: 'search_history',
   CACHE_PREFIX: 'cache_',
 };
 
@@ -49,28 +48,6 @@ export const storage = {
       await AsyncStorage.setItem(KEYS.DOWNLOADS, JSON.stringify(updated));
     } catch (error) {
       console.error('removeDownload error:', error);
-    }
-  },
-
-  // --- Search History ---
-  async getSearchHistory(): Promise<string[]> {
-    try {
-      const jsonValue = await AsyncStorage.getItem(KEYS.SEARCH_HISTORY);
-      return jsonValue ? JSON.parse(jsonValue) : [];
-    } catch (error) {
-      console.error('getSearchHistory error:', error);
-      return [];
-    }
-  },
-
-  async addSearchHistory(query: string): Promise<void> {
-    try {
-      const history = await this.getSearchHistory();
-      const filtered = history.filter(q => q.toLowerCase() !== query.toLowerCase());
-      const updated = [query, ...filtered].slice(0, 10);
-      await AsyncStorage.setItem(KEYS.SEARCH_HISTORY, JSON.stringify(updated));
-    } catch (error) {
-      console.error('addSearchHistory error:', error);
     }
   },
 

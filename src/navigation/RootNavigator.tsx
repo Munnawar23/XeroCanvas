@@ -23,8 +23,6 @@ export default function RootStackNavigator() {
         {/* Main app flow screens */}
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
-        
-        {/* Screens that are pushed on top of the main flow */}
         <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
         <Stack.Screen name="Detail" component={WallpaperScreen} /> 
       </Stack.Navigator>

@@ -1,4 +1,3 @@
-// src/components/InfoModal.tsx
 import React from 'react';
 import { View, Text, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import Animated, { FadeInUp, FadeOutDown } from 'react-native-reanimated';

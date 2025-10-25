@@ -1,7 +1,7 @@
-import React from 'react';
+import React from 'react'; 
 import { View, Text, Image, Pressable } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient'; 
-import HapticFeedback from 'react-native-haptic-feedback'; 
+import LinearGradient from 'react-native-linear-gradient';
+import HapticFeedback from 'react-native-haptic-feedback';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,16 +14,14 @@ type CategoryCardProps = {
   onPress: () => void;
 };
 
-export const CategoryCard = ({ category, imageUrl, onPress }: CategoryCardProps) => {
-  // Shared value for press animation
+// Wrap the component with React.memo
+export const CategoryCard = React.memo(({ category, imageUrl, onPress }: CategoryCardProps) => {
   const scale = useSharedValue(1);
 
-  // Animated style to apply the scale transform
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
-  // Press handlers for the animation
   const handlePressIn = () => {
     scale.value = withSpring(0.95);
   };
@@ -31,9 +29,7 @@ export const CategoryCard = ({ category, imageUrl, onPress }: CategoryCardProps)
     scale.value = withSpring(1);
   };
 
-  // Main press handler with haptics
   const handlePress = () => {
-    // Options for haptic feedback
     const options = {
       enableVibrateFallback: true,
       ignoreAndroidSystemSettings: false,
@@ -57,24 +53,20 @@ export const CategoryCard = ({ category, imageUrl, onPress }: CategoryCardProps)
             resizeMode="cover"
           />
         ) : (
-          // Placeholder view if no image is available
           <View className="h-full w-full bg-light-border dark:bg-dark-border" />
         )}
-
-        {/* Gradient overlay for text readability */}
         <LinearGradient
           colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
           className="absolute bottom-0 left-0 right-0 h-2/3 justify-end p-3"
         >
-          <Text 
+          <Text
             className="text-center font-heading text-lg text-white"
             numberOfLines={1}
           >
-            {/* Capitalize the first letter */}
             {category.charAt(0).toUpperCase() + category.slice(1)}
           </Text>
         </LinearGradient>
       </Pressable>
     </Animated.View>
   );
-};
+});

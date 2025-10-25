@@ -1,28 +1,46 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, ScrollView, RefreshControl } from 'react-native';
+import { ExclamationTriangleIcon } from 'react-native-heroicons/outline';
 
-// Define the types for the props that this component expects
 type ErrorStateProps = {
   paddingTop: number;
   errorMessage: string;
-  onRetry: () => void; 
+  onRetry: () => void;
+  refreshing: boolean;
 };
 
-export function ErrorState({ paddingTop, errorMessage, onRetry }: ErrorStateProps) {
-  return (
-    <View
-      style={{ paddingTop }}
-      className="flex-1 bg-background justify-center items-center px-6"
-    >
-      <Text className="text-text text-lg text-center mb-4">
-        {errorMessage}
-      </Text>
-      <TouchableOpacity
-        onPress={onRetry}
-        className="bg-slate-200 active:bg-slate-300 px-6 py-3 rounded-lg"
+export const ErrorState = React.memo(
+  ({ paddingTop, errorMessage, onRetry, refreshing }: ErrorStateProps) => {
+    return (
+      <ScrollView
+        style={{ flex: 1 }}
+        className="bg-background"
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingTop: paddingTop,
+          paddingHorizontal: 24,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRetry}
+            tintColor="#64748B" 
+          />
+        }
       >
-        <Text className="text-text font-semibold">Try Again</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
+        <ExclamationTriangleIcon size={64} className="text-subtext" />
+        
+        <Text className="mt-6 text-center font-heading text-xl text-text">
+          Something Went Wrong
+        </Text>
+        <Text className="mt-2 text-center font-body text-subtext">{errorMessage}</Text>
+
+        <Text className="mt-8 font-body text-md text-subtext/60">
+          Pull down to try again
+        </Text>
+      </ScrollView>
+    );
+  }
+);

@@ -10,10 +10,7 @@ export function LoadingState({ paddingTop }: LoadingStateProps) {
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-background px-4"
-    >
-      <StatusBar barStyle="dark-content" translucent />
-      <Text className="font-heading text-3xl text-text">XeroCanvas</Text>
+      className="flex-1 bg-background px-4">
       <View className="mt-4 flex-row gap-x-3">
         {/* Column 1 */}
         <View className="flex-1 gap-y-3">

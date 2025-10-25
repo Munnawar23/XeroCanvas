@@ -60,8 +60,7 @@ export default function HomeScreen() {
       <ErrorState
         paddingTop={paddingTop}
         errorMessage={error}
-        onRetry={handleRefresh}
-      />
+        onRetry={handleRefresh} refreshing={false}  />
     );
   }
   return (

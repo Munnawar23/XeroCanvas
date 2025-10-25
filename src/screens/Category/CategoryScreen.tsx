@@ -1,58 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StatusBar } from "react-native";
+import React, { useCallback } from "react";
+import { View, Text, StatusBar, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 
-// Hooks, utils, and types
+// Hooks, types, and reusable components
 import { useSafePadding } from "@hooks/useSafePadding";
-import { CATEGORIES, fetchCategoryPreview } from "@api/index";
-import { storage } from "@utils/storage";
+import { useCategories, CategoryWithImage } from "@screens/Category/hooks/useCategories"; // <-- New Hook
 import { AppNavigationProp } from "@navigation/types";
-
-// Components
 import { CategoryCard } from "@screens/Category/components/CategoryCard";
-import { LoadingCard } from "@components/common/LoadingCard";
-
-type CategoryWithImage = { name: string; imageUrl: string | null };
+import { LoadingState } from "@components/layout/LoadingState";
+import { ErrorState } from "@components/layout/ErrorState";
 
 export default function CategoryScreen() {
   const { paddingTop } = useSafePadding();
   const navigation = useNavigation<AppNavigationProp>();
 
-  const [categories, setCategories] = useState<CategoryWithImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { categories, loading, refreshing, error, handleRefresh } = useCategories();
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      const cacheKey = "categories_with_images";
-      try {
-        let data = await storage.getCache<CategoryWithImage[]>(cacheKey);
-        if (!data) {
-          const fetched = await Promise.all(
-            CATEGORIES.map(async (category) => {
-              const preview = await fetchCategoryPreview(category);
-              return {
-                name: category,
-                imageUrl: preview?.webformatURL || null,
-              };
-            })
-          );
-          data = fetched;
-          await storage.setCache(cacheKey, data, 24 * 60 * 60 * 1000);
-        }
-        setCategories(data);
-      } catch (error) {
-        console.error("Error loading categories:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCategories();
-  }, []);
-
-  const handleCategoryPress = (category: string) => {
+  const handleCategoryPress = useCallback((category: string) => {
     navigation.navigate("CategoryDetail", { category });
-  };
+  }, [navigation]);
 
   const renderItem = ({ item }: { item: CategoryWithImage }) => (
     <View className="flex-1 p-1.5 mb-3">
@@ -64,40 +31,37 @@ export default function CategoryScreen() {
     </View>
   );
 
-  const LoadingState = () => (
-    <View className="mt-4 flex-row flex-wrap justify-between px-2">
-      {[...Array(8)].map((_, i) => (
-        <View key={i} className="w-[49%] p-1.5">
-          <LoadingCard aspectRatio={1} />
-        </View>
-      ))}
-    </View>
-  );
+  // Reusable loading and error states
+  if (loading) {
+    return <LoadingState paddingTop={paddingTop} />;
+  }
+
+  if (error) {
+    return (
+      <ErrorState paddingTop={paddingTop} errorMessage={error} onRetry={handleRefresh} refreshing={false} />
+    );
+  }
 
   return (
-    <View
-      style={{ paddingTop }}
-      className="flex-1 bg-background"
-    >
-      <StatusBar barStyle="dark-content" />
+    <View style={{ paddingTop }} className="flex-1 bg-background">
       <View className="px-4 pb-4">
-        <Text className="font-heading text-3xl text-text">
-          Categories
-        </Text>
+        <Text className="font-heading text-3xl text-text">Categories</Text>
       </View>
 
-      {loading ? (
-        <LoadingState />
-      ) : (
-        <FlashList
-          data={categories}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.name}
-          numColumns={2}
-          masonry
-          contentContainerStyle={{ paddingHorizontal: 4 }}
-        />
-      )}
+      <FlashList
+        data={categories}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.name}
+        numColumns={2}
+        contentContainerStyle={{ paddingHorizontal: 4 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#64748B"
+          />
+        }
+      />
     </View>
   );
 }

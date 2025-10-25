@@ -1,10 +1,12 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 import HomeScreen from "@screens/Home/HomeScreen";
 import CategoryScreen from "@screens/Category/CategoryScreen";
 import SearchScreen from "@screens/Search/SearchScreen";
 import DownloadsScreen from "@screens/Downloads/DownloadsScreen";
+import OfflineState from "@components/layout/OfflineState"; 
 
 // Heroicons
 import {
@@ -12,12 +14,13 @@ import {
   TagIcon,
   MagnifyingGlassIcon,
   ArrowDownTrayIcon,
-  Cog6ToothIcon,
 } from "react-native-heroicons/outline";
 
 const Tab = createBottomTabNavigator();
 
 export default function MainTabNavigator() {
+  const netInfo = useNetInfo();
+
   // Static styles for the light theme
   const tabBarStyle = {
     backgroundColor: "#FFFFFF", // from theme.colors.card
@@ -26,6 +29,10 @@ export default function MainTabNavigator() {
 
   const activeTint = "#3B82F6"; // from theme.colors.accent
   const inactiveTint = "#64748B"; // from theme.colors.subtext
+
+  if (netInfo.isConnected === false) {
+    return <OfflineState />;
+  }
 
   return (
     <Tab.Navigator
@@ -47,7 +54,7 @@ export default function MainTabNavigator() {
             case "Search":
               icon = <MagnifyingGlassIcon color={color} size={size} />;
               break;
-            case "Downloads": // Corrected name to match screen
+            case "Downloads":
               icon = <ArrowDownTrayIcon color={color} size={size} />;
               break;
           }

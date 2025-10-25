@@ -1,19 +1,21 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useNetInfo } from "@react-native-community/netinfo";
-
+import { Platform } from "react-native";
 import HomeScreen from "@screens/Home/HomeScreen";
 import CategoryScreen from "@screens/Category/CategoryScreen";
 import SearchScreen from "@screens/Search/SearchScreen";
-import DownloadsScreen from "@screens/Downloads/DownloadsScreen";
-import OfflineState from "@components/layout/OfflineState"; 
+import FavouritesScreen from "@screens/Favourites/FavouritesScreen";
+import SettingsScreen from "@screens/Settings/SettingsScreen";
+import OfflineState from "@components/layout/OfflineState";
 
 // Heroicons
 import {
   HomeIcon,
   TagIcon,
   MagnifyingGlassIcon,
-  ArrowDownTrayIcon,
+  HeartIcon,
+  Cog6ToothIcon,
 } from "react-native-heroicons/outline";
 
 const Tab = createBottomTabNavigator();
@@ -21,14 +23,8 @@ const Tab = createBottomTabNavigator();
 export default function MainTabNavigator() {
   const netInfo = useNetInfo();
 
-  // Static styles for the light theme
-  const tabBarStyle = {
-    backgroundColor: "#FFFFFF", // from theme.colors.card
-    borderTopColor: "#E5E7EB", // from theme.colors.border
-  };
-
-  const activeTint = "#3B82F6"; // from theme.colors.accent
-  const inactiveTint = "#64748B"; // from theme.colors.subtext
+  const activeTint = "#3B82F6";
+  const inactiveTint = "#64748B";
 
   if (netInfo.isConnected === false) {
     return <OfflineState />;
@@ -38,24 +34,47 @@ export default function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle,
+        tabBarStyle: {
+          position: "absolute" as const,
+          backgroundColor: "#FFFFFF",
+          borderRadius: 20,
+          marginHorizontal: 40,
+          marginBottom: Platform.OS === "ios" ? 40 : 30,
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: Platform.OS === "ios" ? 60 : 55,
+          borderTopWidth: 0,
+          elevation: 10,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 5,
+          },
+          shadowOpacity: 0.15,
+          shadowRadius: 10,
+        },
         tabBarActiveTintColor: activeTint,
         tabBarInactiveTintColor: inactiveTint,
-        tabBarIcon: ({ color, size }) => {
-          let icon = <HomeIcon color={color} size={size} />;
+        tabBarShowLabel: false,
+        tabBarIcon: ({ color, size, focused }) => {
+          const iconSize = focused ? 26 : 22;
+          let icon = <HomeIcon color={color} size={iconSize} />;
 
           switch (route.name) {
             case "Home":
-              icon = <HomeIcon color={color} size={size} />;
+              icon = <HomeIcon color={color} size={iconSize} />;
               break;
             case "Category":
-              icon = <TagIcon color={color} size={size} />;
+              icon = <TagIcon color={color} size={iconSize} />;
               break;
             case "Search":
-              icon = <MagnifyingGlassIcon color={color} size={size} />;
+              icon = <MagnifyingGlassIcon color={color} size={iconSize} />;
               break;
-            case "Downloads":
-              icon = <ArrowDownTrayIcon color={color} size={size} />;
+            case "Favourites":
+              icon = <HeartIcon color={color} size={iconSize} />;
+              break;
+            case "Settings":
+              icon = <Cog6ToothIcon color={color} size={iconSize} />;
               break;
           }
 
@@ -66,7 +85,8 @@ export default function MainTabNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Category" component={CategoryScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Downloads" component={DownloadsScreen} />
+      <Tab.Screen name="Favourites" component={FavouritesScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }

@@ -10,7 +10,7 @@ import { FlashList, ListRenderItem } from "@shopify/flash-list";
 
 // Hooks, types, and components
 import { useSafePadding } from "@hooks/useSafePadding";
-import { useWallpapers } from "@hooks/useWallpapers";
+import { useWallpapers } from "@screens/Home/hooks/useWallpapers";
 import { PixabayImage } from "@api/index";
 import { AppNavigationProp } from "@navigation/types";
 import { WallpaperCard } from "@components/common/WallpaperCard";

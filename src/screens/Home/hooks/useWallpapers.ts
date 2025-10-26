@@ -2,14 +2,18 @@ import { useState, useEffect, useCallback } from "react";
 import { fetchWallpapers, PixabayImage } from "@api/index";
 import { storage } from "@utils/storage";
 
-// Define the expected response type for clarity
+// Response type for clarity and type safety
 type PixabayResponse = {
   hits: PixabayImage[];
   total: number;
   totalHits: number;
 };
 
+/**
+ * Custom hook to manage wallpapers fetching, caching, and pagination.
+ */
 export const useWallpapers = () => {
+  // --- State variables ---
   const [wallpapers, setWallpapers] = useState<PixabayImage[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -18,37 +22,43 @@ export const useWallpapers = () => {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- Main data loading function with caching and force refresh ---
+  /**
+   * Load wallpapers from cache or API.
+   * @param pageNum - Page number to load
+   * @param append - Whether to append results to existing list
+   * @param forceRefresh - Whether to bypass cache
+   */
   const loadWallpapers = useCallback(
     async (pageNum: number = 1, append: boolean = false, forceRefresh: boolean = false) => {
-      // Set loading state based on action type
+      // Set appropriate loading state
       if (append) {
         setLoadingMore(true);
       } else {
         setLoading(true);
       }
-      setError(null); // Reset error on new attempt
+
+      setError(null); // Reset previous error
 
       try {
         const cacheKey = `wallpapers_page_${pageNum}`;
 
-        // Try to get data from cache first, unless a force refresh is requested
+        // Try to use cached data first
         if (!forceRefresh) {
           const cachedData = await storage.getCache<PixabayResponse>(cacheKey);
           if (cachedData) {
             if (cachedData.hits.length === 0) setHasMore(false);
-            setWallpapers((prev) => (append ? [...prev, ...cachedData.hits] : cachedData.hits));
-            return; // Exit early after setting state from cache
+            setWallpapers(prev => (append ? [...prev, ...cachedData.hits] : cachedData.hits));
+            return; // Exit after setting state from cache
           }
         }
 
-        // --- Fetch from API if not in cache or if forced ---
+        // Fetch data from API
         const data = await fetchWallpapers({ page: pageNum, order: "popular" });
         await storage.setCache(cacheKey, data); // Update cache with fresh data
 
         if (data?.hits) {
           if (data.hits.length === 0) setHasMore(false);
-          setWallpapers((prev) => (append ? [...prev, ...data.hits] : data.hits));
+          setWallpapers(prev => (append ? [...prev, ...data.hits] : data.hits));
         }
       } catch (err) {
         console.error("Failed to load wallpapers:", err);
@@ -63,21 +73,25 @@ export const useWallpapers = () => {
     []
   );
 
-  // --- Initial load ---
+  // --- Initial load on mount ---
   useEffect(() => {
     loadWallpapers(1);
   }, [loadWallpapers]);
 
-  // --- Handler for pull-to-refresh ---
+  /**
+   * Handler for pull-to-refresh.
+   * Forces a refresh and resets page to 1.
+   */
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
     setPage(1);
     setHasMore(true);
-    // Force refresh to bypass cache and get new data for page 1
-    loadWallpapers(1, false, true);
+    loadWallpapers(1, false, true); // Force refresh
   }, [loadWallpapers]);
 
-  // --- Handler for loading more on scroll ---
+  /**
+   * Handler for infinite scroll / load more.
+   */
   const handleLoadMore = useCallback(() => {
     if (loadingMore || !hasMore) return;
 
@@ -86,7 +100,7 @@ export const useWallpapers = () => {
     loadWallpapers(nextPage, true);
   }, [loadingMore, hasMore, page, loadWallpapers]);
 
-  // Return state and handlers for the UI component to use
+  // Return all state and handlers for UI
   return {
     wallpapers,
     loading,

@@ -8,19 +8,33 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+/**
+ * Props for the CategoryCard component.
+ */
 type CategoryCardProps = {
+  /** The name of the category to display. */
   category: string;
+  /** The URL for the background image of the card. */
   imageUrl: string | null;
+  /** The function to call when the card is pressed. */
   onPress: () => void;
 };
 
-// Wrap the component with React.memo
+/**
+ * A memoized card component to display a single category.
+ * Features a press-in animation and displays a title over a background image.
+ * If no image is available, it shows a placeholder background.
+ */
 export const CategoryCard = React.memo(({ category, imageUrl, onPress }: CategoryCardProps) => {
+  // Shared value for the press animation
   const scale = useSharedValue(1);
 
+  // Animated style to apply the scale transformation
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
+
+  // --- Animation and Haptic Feedback Handlers ---
 
   const handlePressIn = () => {
     scale.value = withSpring(0.95);
@@ -28,13 +42,8 @@ export const CategoryCard = React.memo(({ category, imageUrl, onPress }: Categor
   const handlePressOut = () => {
     scale.value = withSpring(1);
   };
-
   const handlePress = () => {
-    const options = {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    };
-    HapticFeedback.trigger('impactLight', options);
+    HapticFeedback.trigger('impactLight');
     onPress();
   };
 
@@ -44,8 +53,10 @@ export const CategoryCard = React.memo(({ category, imageUrl, onPress }: Categor
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        className="aspect-square overflow-hidden rounded-xl bg-light-card dark:bg-dark-card shadow-sm"
+        // Use theme-aware card and border colors
+        className="aspect-square overflow-hidden rounded-xl bg-card dark:bg-dark-card"
       >
+        {/* Conditional rendering for the background image or placeholder */}
         {imageUrl ? (
           <Image
             source={{ uri: imageUrl }}
@@ -53,8 +64,10 @@ export const CategoryCard = React.memo(({ category, imageUrl, onPress }: Categor
             resizeMode="cover"
           />
         ) : (
-          <View className="h-full w-full bg-light-border dark:bg-dark-border" />
+          <View className="h-full w-full bg-border dark:bg-dark-border" />
         )}
+        
+        {/* Gradient overlay to ensure text readability */}
         <LinearGradient
           colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
           className="absolute bottom-0 left-0 right-0 h-2/3 justify-end p-3"
@@ -63,6 +76,7 @@ export const CategoryCard = React.memo(({ category, imageUrl, onPress }: Categor
             className="text-center font-heading text-lg text-white"
             numberOfLines={1}
           >
+            {/* Capitalize the first letter of the category name */}
             {category.charAt(0).toUpperCase() + category.slice(1)}
           </Text>
         </LinearGradient>

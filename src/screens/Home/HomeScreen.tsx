@@ -1,27 +1,30 @@
-import React, { useCallback } from "react";
-import {
-  View,
-  Text,
-  RefreshControl,
-  StatusBar,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { FlashList, ListRenderItem } from "@shopify/flash-list";
+import React, { useCallback } from 'react';
+import { View, Text, RefreshControl, StatusBar } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { FlashList, ListRenderItem } from '@shopify/flash-list';
+import { useColorScheme } from 'nativewind';
 
 // Hooks, types, and components
-import { useSafePadding } from "@hooks/useSafePadding";
-import { useWallpapers } from "@screens/Home/hooks/useWallpapers";
-import { PixabayImage } from "@api/index";
-import { AppNavigationProp } from "@navigation/types";
-import { WallpaperCard } from "@components/common/WallpaperCard";
-import { LoadingState } from "@components/layout/LoadingState";
-import { ErrorState } from "@components/layout/ErrorState";
-import { ListFooter } from "@components/layout/ListFooter";
+import { useSafePadding } from '@hooks/useSafePadding';
+import { useWallpapers } from '@screens/Home/hooks/useWallpapers';
+import { PixabayImage } from '@api/index';
+import { AppNavigationProp } from '@navigation/types';
+import { WallpaperCard } from '@components/common/WallpaperCard';
+import { LoadingState } from '@components/layout/LoadingState';
+import { ErrorState } from '@components/layout/ErrorState';
+import { ListFooter } from '@components/layout/ListFooter';
 import { useFavouritesStore } from '@store/FavouritesStore';
 
+/**
+ * The main screen of the application.
+ * Displays a masonry grid of wallpapers fetched from the API.
+ * Supports pull-to-refresh and infinite scrolling.
+ */
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigationProp>();
   const { paddingTop } = useSafePadding();
+  const { colorScheme } = useColorScheme();
+
   const {
     wallpapers,
     loading,
@@ -32,26 +35,32 @@ export default function HomeScreen() {
     handleLoadMore,
   } = useWallpapers();
 
-  const favourites = useFavouritesStore((state) => state.favourites);
-  const toggleFavourite = useFavouritesStore((state) => state.toggleFavourite);
+  // Favourites state from Zustand store
+  const favourites = useFavouritesStore(state => state.favourites);
+  const toggleFavourite = useFavouritesStore(state => state.toggleFavourite);
 
-  // --- THIS IS THE CORRECTED SECTION ---
+  /**
+   * Memoized navigation handler to prevent re-renders.
+   * Navigates to the detail screen with the selected wallpaper data.
+   */
   const handleWallpaperPress = useCallback(
     (wallpaper: PixabayImage) => {
-      navigation.navigate("Detail", {
-        // Convert the object to a string to match your navigation type definition
+      navigation.navigate('Detail', {
         wallpaper: JSON.stringify(wallpaper),
       });
     },
-    [navigation]
+    [navigation],
   );
-  // --- END OF CORRECTION ---
 
+  /**
+   * Renders a single wallpaper card within the FlashList.
+   * Determines if the wallpaper is a favourite and passes down the relevant props.
+   */
   const renderItem: ListRenderItem<PixabayImage> = ({ item }) => {
-    const isFavourite = favourites.some((fav) => fav.id === item.id);
+    const isFavourite = favourites.some(fav => fav.id === item.id);
 
     return (
-      <View className="flex-1 p-1.5 mb-3">
+      <View className="p-1.5">
         <WallpaperCard
           wallpaper={item}
           isFavourite={isFavourite}
@@ -62,6 +71,8 @@ export default function HomeScreen() {
     );
   };
 
+  // --- Render logic based on state ---
+
   if (loading) {
     return <LoadingState paddingTop={paddingTop} />;
   }
@@ -71,26 +82,33 @@ export default function HomeScreen() {
       <ErrorState
         paddingTop={paddingTop}
         errorMessage={error}
-        onRetry={handleRefresh} refreshing={false}  />
+        onRetry={handleRefresh}
+        refreshing={refreshing}
+      />
     );
   }
-  
+
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-background"
+      className="flex-1 bg-background dark:bg-dark-background"
     >
-      <StatusBar barStyle="dark-content" />
-      <Text className="px-4 pb-3 font-heading text-3xl text-text">
+      {/* Status bar that adapts to the current theme */}
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+      />
+
+      {/* Screen Title */}
+      <Text className="px-4 pb-3 font-heading text-3xl text-text dark:text-dark-text">
         XeroCanvas
       </Text>
 
+      {/* Masonry list of wallpapers */}
       <FlashList<PixabayImage>
         data={wallpapers}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         numColumns={2}
-        masonry
         contentContainerStyle={{ paddingHorizontal: 4 }}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
@@ -99,7 +117,7 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="#64748B"
+            tintColor={colorScheme === 'dark' ? '#9CA3AF' : '#64748B'}
           />
         }
       />

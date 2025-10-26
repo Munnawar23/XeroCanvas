@@ -12,15 +12,17 @@ export type DownloadedWallpaper = {
   };
 };
 
-// --- Storage Keys ---
+// Storage keys
 const KEYS = {
   DOWNLOADS: 'downloads',
   CACHE_PREFIX: 'cache_',
 };
 
-// --- Storage Helper ---
+/**
+ * Storage helper to manage downloads and cached data in AsyncStorage.
+ */
 export const storage = {
-  // --- Downloads ---
+  /** Get all downloaded wallpapers */
   async getDownloads(): Promise<DownloadedWallpaper[]> {
     try {
       const jsonValue = await AsyncStorage.getItem(KEYS.DOWNLOADS);
@@ -31,6 +33,7 @@ export const storage = {
     }
   },
 
+  /** Add a wallpaper to downloads */
   async addDownload(wallpaper: DownloadedWallpaper): Promise<void> {
     try {
       const existing = await this.getDownloads();
@@ -41,6 +44,7 @@ export const storage = {
     }
   },
 
+  /** Remove a wallpaper from downloads by ID */
   async removeDownload(id: string): Promise<void> {
     try {
       const downloads = await this.getDownloads();
@@ -51,7 +55,7 @@ export const storage = {
     }
   },
 
-  // --- Cache ---
+  /** Set cached data with optional expiry */
   async setCache<T>(key: string, data: T, expiresInMs = 24 * 60 * 60 * 1000): Promise<void> {
     try {
       const cacheData = { data, expiresAt: Date.now() + expiresInMs };
@@ -61,15 +65,18 @@ export const storage = {
     }
   },
 
+  /** Get cached data if not expired */
   async getCache<T>(key: string): Promise<T | null> {
     try {
       const jsonValue = await AsyncStorage.getItem(`${KEYS.CACHE_PREFIX}${key}`);
       if (!jsonValue) return null;
+
       const cache = JSON.parse(jsonValue);
       if (Date.now() > cache.expiresAt) {
         await AsyncStorage.removeItem(`${KEYS.CACHE_PREFIX}${key}`);
         return null;
       }
+
       return cache.data as T;
     } catch (error) {
       console.error(`getCache error (${key}):`, error);
@@ -77,6 +84,7 @@ export const storage = {
     }
   },
 
+  /** Clear all cached data */
   async clearAllCache(): Promise<void> {
     try {
       const allKeys = await AsyncStorage.getAllKeys();

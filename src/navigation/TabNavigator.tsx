@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { Platform } from "react-native";
+import { useColorScheme } from "nativewind";
+
+// Screens
 import HomeScreen from "@screens/Home/HomeScreen";
 import CategoryScreen from "@screens/Category/CategoryScreen";
 import SearchScreen from "@screens/Search/SearchScreen";
 import FavouritesScreen from "@screens/Favourites/FavouritesScreen";
-import SettingsScreen from "@screens/Settings/SettingsScreen";
+
+// Components
 import OfflineState from "@components/layout/OfflineState";
 
 // Heroicons
@@ -15,20 +19,52 @@ import {
   TagIcon,
   MagnifyingGlassIcon,
   HeartIcon,
-  Cog6ToothIcon,
 } from "react-native-heroicons/outline";
 
 const Tab = createBottomTabNavigator();
 
 export default function MainTabNavigator() {
   const netInfo = useNetInfo();
+  const { colorScheme } = useColorScheme();
 
-  const activeTint = "#3B82F6";
-  const inactiveTint = "#64748B";
+  // Tailwind colors from config
+  const colors = useMemo(
+    () => ({
+      active: colorScheme === "dark" ? "#A78BFA" : "#3B82F6",
+      inactive: colorScheme === "dark" ? "#CBD5E1" : "#64748B",
+      background: colorScheme === "dark" ? "#1E293B" : "#FFFFFF",
+      shadow: colorScheme === "dark" ? "#000" : "#000",
+    }),
+    [colorScheme]
+  );
 
+  // Show offline state if there is no internet
   if (netInfo.isConnected === false) {
     return <OfflineState />;
   }
+
+  /**
+   * Returns the appropriate icon for each tab.
+   * Uses useMemo to avoid unnecessary re-renders.
+   */
+  const renderIcon = useMemo(
+    () => (routeName: string, color: string, focused: boolean) => {
+      const iconSize = focused ? 26 : 22;
+      switch (routeName) {
+        case "Home":
+          return <HomeIcon color={color} size={iconSize} />;
+        case "Category":
+          return <TagIcon color={color} size={iconSize} />;
+        case "Search":
+          return <MagnifyingGlassIcon color={color} size={iconSize} />;
+        case "Favourites":
+          return <HeartIcon color={color} size={iconSize} />;
+        default:
+          return <HomeIcon color={color} size={iconSize} />;
+      }
+    },
+    []
+  );
 
   return (
     <Tab.Navigator
@@ -36,7 +72,7 @@ export default function MainTabNavigator() {
         headerShown: false,
         tabBarStyle: {
           position: "absolute" as const,
-          backgroundColor: "#FFFFFF",
+          backgroundColor: colors.background,
           borderRadius: 20,
           marginHorizontal: 40,
           marginBottom: Platform.OS === "ios" ? 40 : 30,
@@ -45,48 +81,21 @@ export default function MainTabNavigator() {
           height: Platform.OS === "ios" ? 60 : 55,
           borderTopWidth: 0,
           elevation: 10,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 5,
-          },
+          shadowColor: colors.shadow,
+          shadowOffset: { width: 0, height: 5 },
           shadowOpacity: 0.15,
           shadowRadius: 10,
         },
-        tabBarActiveTintColor: activeTint,
-        tabBarInactiveTintColor: inactiveTint,
+        tabBarActiveTintColor: colors.active,
+        tabBarInactiveTintColor: colors.inactive,
         tabBarShowLabel: false,
-        tabBarIcon: ({ color, size, focused }) => {
-          const iconSize = focused ? 26 : 22;
-          let icon = <HomeIcon color={color} size={iconSize} />;
-
-          switch (route.name) {
-            case "Home":
-              icon = <HomeIcon color={color} size={iconSize} />;
-              break;
-            case "Category":
-              icon = <TagIcon color={color} size={iconSize} />;
-              break;
-            case "Search":
-              icon = <MagnifyingGlassIcon color={color} size={iconSize} />;
-              break;
-            case "Favourites":
-              icon = <HeartIcon color={color} size={iconSize} />;
-              break;
-            case "Settings":
-              icon = <Cog6ToothIcon color={color} size={iconSize} />;
-              break;
-          }
-
-          return icon;
-        },
+        tabBarIcon: ({ color, size, focused }) => renderIcon(route.name, color, focused),
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Category" component={CategoryScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Favourites" component={FavouritesScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }

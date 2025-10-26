@@ -1,9 +1,7 @@
-// src/stores/FavouriteStore.tsx
-
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Toast from 'react-native-toast-message'; // <-- 1. Import Toast
+import Toast from 'react-native-toast-message';
 import { PixabayImage } from '@api/index';
 
 interface FavouritesState {
@@ -12,35 +10,34 @@ interface FavouritesState {
   isFavourite: (wallpaperId: number) => boolean;
 }
 
+/**
+ * Zustand store to manage favourite wallpapers with persistence.
+ */
 export const useFavouritesStore = create<FavouritesState>()(
   persist(
     (set, get) => ({
       favourites: [],
       toggleFavourite: (wallpaper) => {
         const currentFavourites = get().favourites;
-        const isAlreadyFavourite = currentFavourites.some((fav) => fav.id === wallpaper.id);
+        const isAlreadyFavourite = currentFavourites.some(fav => fav.id === wallpaper.id);
 
         if (isAlreadyFavourite) {
-          // It's already a favourite, so we are removing it.
-          const updatedFavourites = currentFavourites.filter((fav) => fav.id !== wallpaper.id);
+          // Remove wallpaper from favourites
+          const updatedFavourites = currentFavourites.filter(fav => fav.id !== wallpaper.id);
           set({ favourites: updatedFavourites });
-          // Note: The "removed" toast is handled in FavouritesScreen as requested,
-          // because it's a specific UI interaction on that screen.
         } else {
-          // --- 2. ADD THE TOAST LOGIC HERE ---
-          // It's a new favourite, so we are adding it.
+          // Add wallpaper to favourites and show toast
           set({ favourites: [wallpaper, ...currentFavourites] });
           Toast.show({
-            type: 'success', // 'success' usually has a green bar
+            type: 'success',
             text1: 'Added to Favourites',
             position: 'top',
-            visibilityTime: 2000, // Show for 2 seconds
+            visibilityTime: 2000,
           });
         }
       },
       isFavourite: (wallpaperId) => {
-        const currentFavourites = get().favourites;
-        return currentFavourites.some((fav) => fav.id === wallpaperId);
+        return get().favourites.some(fav => fav.id === wallpaperId);
       },
     }),
     {

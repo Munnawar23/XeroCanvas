@@ -7,12 +7,22 @@ import Animated, {
 } from "react-native-reanimated";
 import { wp, hp } from "@helpers/index";
 
+/**
+ * Props for the Button component.
+ */
 type ButtonProps = {
+  /** The text to be displayed inside the button. */
   title: string;
+  /** The function to call when the button is pressed. */
   onPress: () => void;
+  /** If true, the button will be non-interactive. Defaults to false. */
   disabled?: boolean;
 };
 
+/**
+ * A memoized, animated primary button component.
+ * It uses the app's design system for styling and provides visual feedback on press.
+ */
 export const Button = React.memo(({ title, onPress, disabled = false }: ButtonProps) => {
   const scale = useSharedValue(1);
 
@@ -23,31 +33,35 @@ export const Button = React.memo(({ title, onPress, disabled = false }: ButtonPr
     };
   });
 
-  // Handler for when the user presses down on the button
+  // --- Animation Handlers ---
+
   const handlePressIn = () => {
-    // We use withSpring for a nice, bouncy effect
+    // Use withSpring for a bouncy, physical-feeling press effect
     scale.value = withSpring(0.97);
   };
 
-  // Handler for when the user releases the button
   const handlePressOut = () => {
     scale.value = withSpring(1);
   };
 
   return (
-    // The Animated.View is the component that gets scaled
     <Animated.View style={animatedStyle}>
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled}
-        className={`bg-black rounded-xl justify-center items-center ${
-          disabled ? "opacity-60" : ""
-        }`}
+        // Apply theme-aware accent color for the background
+        className={`
+          justify-center items-center rounded-xl 
+          bg-accent dark:bg-dark-accent
+          ${disabled ? "opacity-60" : ""}
+        `}
         style={{ width: wp(85), height: hp(6) }}
       >
-        <Text className="text-white font-semibold text-xl">{title}</Text>
+        <Text className="text-white font-accent text-lg">
+          {title}
+        </Text>
       </Pressable>
     </Animated.View>
   );

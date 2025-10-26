@@ -1,12 +1,8 @@
-import { Platform } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 
 /**
- * Download an image from a URL and save it to the gallery
- * @param imageUrl - URL of the image
- * @param fileName - Optional file name (default: wallpaper_TIMESTAMP.jpg)
- * @returns local URI of saved image
+ * Download an image from a URL and save it to the device gallery.
  */
 export const downloadImage = async (imageUrl: string, fileName?: string) => {
   try {
@@ -16,7 +12,7 @@ export const downloadImage = async (imageUrl: string, fileName?: string) => {
 
     const res = await ReactNativeBlobUtil.config({
       fileCache: true,
-      path, // use full path with file name
+      path,
       appendExt: 'jpg',
     }).fetch('GET', imageUrl);
 

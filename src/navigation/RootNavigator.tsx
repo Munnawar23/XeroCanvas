@@ -1,15 +1,14 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-
 import SplashScreen from "@screens/Splash/SplashScreen";
 import MainTabNavigator from "@navigation/TabNavigator";
 import CategoryDetailScreen from "@screens/Category/components/CategoryDetailScreen";
-import WallpaperScreen from "@screens/Wallpaper/WallpaperScreen"; // Renamed import
+import WallpaperScreen from "@screens/Wallpaper/WallpaperScreen"; 
 
 export type RootStackParamList = {
   Splash: undefined;
-  Main: undefined; // This represents the screen with the Tab Navigator
+  Main: undefined;
   Detail: { wallpaper: string };
   CategoryDetail: { category: string };
 };
@@ -20,7 +19,6 @@ export default function RootStackNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* Main app flow screens */}
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />

@@ -1,4 +1,6 @@
-import { PIXABAY_API_KEY } from '@env'; 
+import { PIXABAY_API_KEY } from '@env';
+
+// Base URL for Pixabay API
 const PIXABAY_BASE_URL = "https://pixabay.com/api/";
 
 // Wallpaper categories
@@ -9,7 +11,7 @@ export const CATEGORIES = [
   "travel", "buildings", "business", "music",
 ];
 
-// Color filters
+// Color filters for wallpaper search
 export const COLOR_FILTERS = [
   "grayscale", "red", "orange", "yellow", "green", "turquoise",
   "blue", "lilac", "pink", "white", "gray", "black", "brown",
@@ -51,6 +53,10 @@ export type FetchWallpapersParams = {
 };
 
 // --- API Functions ---
+
+/**
+ * Fetch wallpapers from Pixabay API with optional filters.
+ */
 export const fetchWallpapers = async (
   params: FetchWallpapersParams = {}
 ): Promise<PixabayResponse> => {
@@ -72,9 +78,7 @@ export const fetchWallpapers = async (
     const response = await fetch(url);
 
     if (!response.ok) {
-      if (response.status === 429) {
-        throw new Error("Rate limit exceeded. Try again later.");
-      }
+      if (response.status === 429) throw new Error("Rate limit exceeded. Try again later.");
       throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
 
@@ -85,19 +89,24 @@ export const fetchWallpapers = async (
   }
 };
 
+/**
+ * Fetch a random preview image from a specific category.
+ */
 export const fetchCategoryPreview = async (
   category: string
 ): Promise<PixabayImage | null> => {
   try {
     const response = await fetchWallpapers({
-      category: category, 
+      category: category,
       per_page: 10,
       order: "popular",
     });
+
     if (response && response.hits.length > 0) {
       const randomIndex = Math.floor(Math.random() * response.hits.length);
       return response.hits[randomIndex];
     }
+
     return null;
   } catch (error) {
     console.error("Failed to fetch category preview:", error);

@@ -3,6 +3,7 @@ import { View, Text, StatusBar, RefreshControl, Platform } from 'react-native';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { useColorScheme } from 'nativewind';
 
 // Hooks, types, and components
 import { useSafePadding } from '@hooks/useSafePadding';
@@ -12,12 +13,23 @@ import { useFavourites } from '@screens/Favourites/hooks/useFavourites';
 import { EmptyState } from '@screens/Favourites/components/EmptyState';
 import { FavouriteWallpaperCard } from '@screens/Favourites/components/FavouriteWallpaperCard';
 
+/**
+ * A screen that displays the user's saved favourite wallpapers.
+ * Allows users to view, remove, and refresh their favourites.
+ */
 export default function FavouritesScreen() {
   const { paddingTop } = useSafePadding();
   const navigation = useNavigation<AppNavigationProp>();
-  const { favourites, refreshing, handleRefresh, toggleFavourite } = useFavourites();
+  const { colorScheme } = useColorScheme();
+  const { favourites, refreshing, handleRefresh, toggleFavourite } =
+    useFavourites();
 
-  // --- 1. Handler for removing a favourite and showing a toast ---
+  // --- Handlers ---
+
+  /**
+   * Memoized handler for removing a favourite wallpaper.
+   * It calls the toggle function and shows a confirmation toast.
+   */
   const handleUnfavouritePress = useCallback(
     (wallpaper: PixabayImage) => {
       toggleFavourite(wallpaper);
@@ -27,22 +39,28 @@ export default function FavouritesScreen() {
         position: 'top',
       });
     },
-    [toggleFavourite]
+    [toggleFavourite],
   );
 
-  // --- 2. Handler for navigating to the detail screen ---
+  /**
+   * Memoized handler for navigating to the wallpaper detail screen.
+   */
   const handleWallpaperPress = useCallback(
     (wallpaper: PixabayImage) => {
       navigation.navigate('Detail', {
         wallpaper: JSON.stringify(wallpaper),
       });
     },
-    [navigation]
+    [navigation],
   );
 
-  // --- 3. Render item card ---
+  // --- Render Logic ---
+
+  /**
+   * Renders a single FavouriteWallpaperCard item for the list.
+   */
   const renderItem: ListRenderItem<PixabayImage> = ({ item }) => (
-    <View className="flex-1 p-1.5 mb-3">
+    <View className="p-1.5">
       <FavouriteWallpaperCard
         item={item}
         onPress={() => handleWallpaperPress(item)}
@@ -51,6 +69,9 @@ export default function FavouritesScreen() {
     </View>
   );
 
+  /**
+   * Conditionally renders the list of favourites or the empty state component.
+   */
   const renderContent = () => {
     if (favourites.length === 0) {
       return <EmptyState />;
@@ -60,17 +81,17 @@ export default function FavouritesScreen() {
       <FlashList
         data={favourites}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         numColumns={2}
         contentContainerStyle={{
           paddingHorizontal: 4,
-          paddingBottom: Platform.OS === 'ios' ? 100 : 80, // 👈 Add bottom padding to avoid tab overlay
+          paddingBottom: Platform.OS === 'ios' ? 100 : 90,
         }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="#64748B"
+            tintColor={colorScheme === 'dark' ? '#9CA3AF' : '#64748B'}
           />
         }
       />
@@ -78,11 +99,23 @@ export default function FavouritesScreen() {
   };
 
   return (
-    <View style={{ paddingTop }} className="flex-1 bg-background">
-      <StatusBar barStyle="dark-content" />
+    <View
+      style={{ paddingTop }}
+      className="flex-1 bg-background dark:bg-dark-background"
+    >
+      {/* Status bar that adapts to the current theme */}
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+      />
+
+      {/* Screen Title */}
       <View className="px-4 pb-4">
-        <Text className="font-heading text-3xl text-text">My Favourites</Text>
+        <Text className="font-heading text-3xl text-text dark:text-dark-text">
+          My Favourites
+        </Text>
       </View>
+
+      {/* Main Content */}
       {renderContent()}
     </View>
   );

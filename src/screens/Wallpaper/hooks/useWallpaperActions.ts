@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  Platform,
-  PermissionsAndroid,
-  Share,
-} from 'react-native';
+import { Platform, PermissionsAndroid, Share } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import HapticFeedback from 'react-native-haptic-feedback';
 import Toast from 'react-native-toast-message';
@@ -16,40 +12,56 @@ export const useWallpaperActions = (wallpaper: PixabayImage) => {
   const [showInfo, setShowInfo] = useState(false);
   const navigation = useNavigation<any>();
 
+  // --- Storage permission for Android ---
   const requestStoragePermission = async (): Promise<boolean> => {
-    if (Platform.OS === 'android') {
-      const sdkInt = Platform.Version as number;
-      const permission =
-        sdkInt >= 33
-          ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
-          : PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+    if (Platform.OS !== 'android') return true;
 
-      try {
-        const granted = await PermissionsAndroid.request(permission, {
-          title: 'Storage Permission Required',
-          message:
-            'XeroCanvas needs access to your storage to download wallpapers.',
-          buttonPositive: 'OK',
-        });
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn('Permission request error:', err);
-        return false;
-      }
+    const sdkInt = Platform.Version as number;
+    const permission =
+      sdkInt >= 33
+        ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+        : PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE;
+
+    try {
+      const granted = await PermissionsAndroid.request(permission, {
+        title: 'Storage Permission Required',
+        message: 'XeroCanvas needs access to storage to save wallpapers.',
+        buttonPositive: 'OK',
+      });
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn('Permission request error:', err);
+      return false;
     }
-    return true;
   };
 
   const handleBack = () => navigation.goBack();
 
+  // --- Share the wallpaper after downloading locally ---
   const handleShare = async () => {
+    setIsDownloading(true);
+    HapticFeedback.trigger('impactMedium');
+
     try {
-      await Share.share({ message: wallpaper.largeImageURL });
+      const localUri = await downloadImage(wallpaper.largeImageURL);
+
+      await Share.share({
+        url: localUri, // Local file path
+      });
     } catch (error) {
       console.error('Error sharing wallpaper:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Share Failed',
+        text2: 'Unable to share wallpaper.',
+        position: 'top',
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
+  // --- Download and save wallpaper ---
   const handleDownload = async () => {
     setIsDownloading(true);
     HapticFeedback.trigger('impactMedium');

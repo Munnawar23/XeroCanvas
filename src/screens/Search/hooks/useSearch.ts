@@ -3,7 +3,11 @@ import HapticFeedback from "react-native-haptic-feedback";
 import { fetchWallpapers, PixabayImage } from "@api/index";
 import { FilterState } from "@screens/Search/components/FilterModal";
 
-// Debounce utility function
+/**
+ * Debounce utility to prevent excessive API calls while typing.
+ * @param func Function to debounce
+ * @param wait Delay in milliseconds
+ */
 const debounce = (func: Function, wait: number) => {
   let timeout: ReturnType<typeof setTimeout>;
   return (...args: any[]) => {
@@ -12,8 +16,11 @@ const debounce = (func: Function, wait: number) => {
   };
 };
 
+/**
+ * Custom hook to manage search state, filters, pagination, and API calls.
+ */
 export const useSearch = () => {
-  // --- State for search parameters ---
+  // --- Search state ---
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     colors: [],
@@ -21,33 +28,40 @@ export const useSearch = () => {
     order: "popular",
   });
 
-  // --- State for data and results ---
+  // --- Data state ---
   const [wallpapers, setWallpapers] = useState<PixabayImage[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const hasSearched = useRef(false);
+  const hasSearched = useRef(false); // Track if user has initiated a search
 
-  // --- State for loading, pagination, and refresh ---
+  // --- Loading, pagination, refresh state ---
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // --- Core data fetching function ---
+  /**
+   * Core function to fetch wallpapers from API
+   * @param query Search string
+   * @param currentFilters Applied filters
+   * @param pageNum Current page
+   * @param append Whether to append results to existing list
+   */
   const performSearch = useCallback(
     async (query: string, currentFilters: FilterState, pageNum: number, append: boolean) => {
       if (!query.trim()) {
         setWallpapers([]);
         return;
       }
-      
+
+      // Set appropriate loading state
       if (append) setLoadingMore(true);
       else setLoading(true);
       setError(null);
 
       try {
         if (!hasSearched.current) hasSearched.current = true;
-        
+
         const response = await fetchWallpapers({
           q: query,
           colors: currentFilters.colors.join(","),
@@ -56,7 +70,10 @@ export const useSearch = () => {
           page: pageNum,
         });
 
+        // Check if there are more results
         if (response.hits.length === 0) setHasMore(false);
+
+        // Update wallpapers list
         setWallpapers((prev) => (append ? [...prev, ...response.hits] : response.hits));
 
       } catch (err) {
@@ -71,7 +88,9 @@ export const useSearch = () => {
     []
   );
 
-  // --- Search trigger with debounce ---
+  /**
+   * Trigger a new search, resets page and results
+   */
   const startNewSearch = useCallback((query: string, currentFilters: FilterState) => {
     setPage(1);
     setHasMore(true);
@@ -79,24 +98,31 @@ export const useSearch = () => {
     performSearch(query, currentFilters, 1, false);
   }, [performSearch]);
 
+  // Debounced search to avoid excessive API calls while typing
   const debouncedSearch = useCallback(debounce(startNewSearch, 500), [startNewSearch]);
 
+  // Trigger search on query or filters change
   useEffect(() => {
-    // Trigger search only if the user has typed or applied filters
     if (searchQuery.trim() || hasSearched.current) {
       debouncedSearch(searchQuery, filters);
     }
   }, [searchQuery, filters, debouncedSearch]);
 
   // --- UI Handlers ---
+
+  /**
+   * Apply new filters to the search
+   */
   const handleApplyFilters = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);
-    hasSearched.current = true; // Mark as searched when filters are applied
+    hasSearched.current = true;
   }, []);
 
+  /**
+   * Clear the current search and reset state
+   */
   const handleClearSearch = useCallback(() => {
-    // --- FIX #2: Call the trigger method on the imported 'HapticFeedback' object ---
-    HapticFeedback.trigger("impactLight");
+    HapticFeedback.trigger("impactLight"); // Provide tactile feedback
     setSearchQuery("");
     setWallpapers([]);
     setPage(1);
@@ -105,6 +131,9 @@ export const useSearch = () => {
     hasSearched.current = false;
   }, []);
 
+  /**
+   * Pull-to-refresh handler
+   */
   const handleRefresh = useCallback(() => {
     if (!searchQuery.trim()) {
       setRefreshing(false);
@@ -114,6 +143,9 @@ export const useSearch = () => {
     startNewSearch(searchQuery, filters);
   }, [searchQuery, filters, startNewSearch]);
 
+  /**
+   * Load more results when user scrolls to bottom
+   */
   const handleLoadMore = useCallback(() => {
     if (loadingMore || !hasMore || !searchQuery.trim()) return;
     const nextPage = page + 1;
@@ -122,7 +154,7 @@ export const useSearch = () => {
   }, [loadingMore, hasMore, page, searchQuery, filters, performSearch]);
 
   return {
-    // State for UI
+    // State
     searchQuery,
     wallpapers,
     loading,
@@ -131,7 +163,7 @@ export const useSearch = () => {
     error,
     hasSearched: hasSearched.current,
     filters,
-    // Handlers for UI
+    // Handlers
     setSearchQuery,
     handleApplyFilters,
     handleClearSearch,

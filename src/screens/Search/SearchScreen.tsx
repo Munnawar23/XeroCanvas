@@ -15,6 +15,8 @@ import { ErrorState } from "@components/layout/ErrorState";
 import { ListFooter } from "@components/layout/ListFooter";
 import { SearchBar } from "@screens/Search/components/SearchBar";
 import { EmptyState } from "@screens/Search/components/EmptyState";
+// --- 1. IMPORT THE STORE ---
+import { useFavouritesStore } from '@store/FavouritesStore';
 
 export default function SearchScreen() {
   const { paddingTop } = useSafePadding();
@@ -36,6 +38,10 @@ export default function SearchScreen() {
     handleRefresh,
     handleLoadMore,
   } = useSearch();
+  
+  // --- 2. CALL HOOKS AT THE TOP LEVEL ---
+  const favourites = useFavouritesStore((state) => state.favourites);
+  const toggleFavourite = useFavouritesStore((state) => state.toggleFavourite);
 
   const handleWallpaperPress = useCallback((wallpaper: PixabayImage) => {
     navigation.navigate("Detail", {
@@ -43,11 +49,22 @@ export default function SearchScreen() {
     });
   }, [navigation]);
 
-  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => (
-    <View className="flex-1 p-1.5 mb-3">
-      <WallpaperCard wallpaper={item} onPress={() => handleWallpaperPress(item)} />
-    </View>
-  );
+  // --- 3. UPDATE RENDERITEM ---
+  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => {
+    // Plain JS check, no hook here
+    const isFavourite = favourites.some(fav => fav.id === item.id);
+
+    return (
+      <View className="flex-1 p-1.5 mb-3">
+        <WallpaperCard
+          wallpaper={item}
+          isFavourite={isFavourite}
+          onToggleFavourite={() => toggleFavourite(item)}
+          onPress={() => handleWallpaperPress(item)}
+        />
+      </View>
+    );
+  };
 
   const renderContent = () => {
     if (loading && !refreshing) {
@@ -72,7 +89,6 @@ export default function SearchScreen() {
         />
       );
     }
-    // Use the new EmptyState component
     return <EmptyState hasSearched={hasSearched} searchQuery={searchQuery} />;
   };
 
@@ -84,9 +100,7 @@ export default function SearchScreen() {
         onClearSearch={handleClearSearch}
         onFilterPress={() => setShowFilters(true)}
       />
-
       {renderContent()}
-
       <FilterModal
         visible={showFilters}
         onClose={() => setShowFilters(false)}

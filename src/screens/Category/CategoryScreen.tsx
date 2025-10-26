@@ -1,11 +1,11 @@
 import React, { useCallback } from "react";
-import { View, Text, StatusBar, RefreshControl } from "react-native";
+import { View, Text, StatusBar, RefreshControl, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 
 // Hooks, types, and reusable components
 import { useSafePadding } from "@hooks/useSafePadding";
-import { useCategories, CategoryWithImage } from "@screens/Category/hooks/useCategories"; // <-- New Hook
+import { useCategories, CategoryWithImage } from "@screens/Category/hooks/useCategories";
 import { AppNavigationProp } from "@navigation/types";
 import { CategoryCard } from "@screens/Category/components/CategoryCard";
 import { LoadingState } from "@components/layout/LoadingState";
@@ -17,9 +17,12 @@ export default function CategoryScreen() {
 
   const { categories, loading, refreshing, error, handleRefresh } = useCategories();
 
-  const handleCategoryPress = useCallback((category: string) => {
-    navigation.navigate("CategoryDetail", { category });
-  }, [navigation]);
+  const handleCategoryPress = useCallback(
+    (category: string) => {
+      navigation.navigate("CategoryDetail", { category });
+    },
+    [navigation]
+  );
 
   const renderItem = ({ item }: { item: CategoryWithImage }) => (
     <View className="flex-1 p-1.5 mb-3">
@@ -31,14 +34,18 @@ export default function CategoryScreen() {
     </View>
   );
 
-  // Reusable loading and error states
   if (loading) {
     return <LoadingState paddingTop={paddingTop} />;
   }
 
   if (error) {
     return (
-      <ErrorState paddingTop={paddingTop} errorMessage={error} onRetry={handleRefresh} refreshing={false} />
+      <ErrorState
+        paddingTop={paddingTop}
+        errorMessage={error}
+        onRetry={handleRefresh}
+        refreshing={false}
+      />
     );
   }
 
@@ -53,7 +60,10 @@ export default function CategoryScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item.name}
         numColumns={2}
-        contentContainerStyle={{ paddingHorizontal: 4 }}
+        contentContainerStyle={{
+          paddingHorizontal: 4,
+          paddingBottom: Platform.OS === "ios" ? 100 : 80, 
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

@@ -14,7 +14,8 @@
       "@types/*": ["./src/types/*"],
       "@context/*": ["./src/context/*"],
       "@api/*": ["./src/api/*"],
-      "@helpers/*": ["./src/helpers/*"]
+      "@helpers/*": ["./src/helpers/*"],
+      "@store/*": ["./src/store/*"]
     },
 
     "jsx": "react-native",

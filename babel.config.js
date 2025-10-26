@@ -30,6 +30,7 @@ module.exports = {
           '@context': './src/context',
           '@helpers': './src/helpers',
           '@api': './src/api',
+          '@store': './src/store',
         },
       },
     ],

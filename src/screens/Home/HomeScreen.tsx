@@ -16,7 +16,8 @@ import { AppNavigationProp } from "@navigation/types";
 import { WallpaperCard } from "@components/common/WallpaperCard";
 import { LoadingState } from "@components/layout/LoadingState";
 import { ErrorState } from "@components/layout/ErrorState";
-import { ListFooter } from "@components/layout/ListFooter"; 
+import { ListFooter } from "@components/layout/ListFooter";
+import { useFavouritesStore } from '@store/FavouritesStore';
 
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigationProp>();
@@ -31,25 +32,35 @@ export default function HomeScreen() {
     handleLoadMore,
   } = useWallpapers();
 
-  // --- Navigate to wallpaper detail ---
+  const favourites = useFavouritesStore((state) => state.favourites);
+  const toggleFavourite = useFavouritesStore((state) => state.toggleFavourite);
+
+  // --- THIS IS THE CORRECTED SECTION ---
   const handleWallpaperPress = useCallback(
     (wallpaper: PixabayImage) => {
       navigation.navigate("Detail", {
+        // Convert the object to a string to match your navigation type definition
         wallpaper: JSON.stringify(wallpaper),
       });
     },
     [navigation]
   );
+  // --- END OF CORRECTION ---
 
-  // --- Render individual wallpaper card ---
-  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => (
-    <View className="flex-1 p-1.5 mb-3">
-      <WallpaperCard
-        wallpaper={item}
-        onPress={() => handleWallpaperPress(item)}
-      />
-    </View>
-  );
+  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => {
+    const isFavourite = favourites.some((fav) => fav.id === item.id);
+
+    return (
+      <View className="flex-1 p-1.5 mb-3">
+        <WallpaperCard
+          wallpaper={item}
+          isFavourite={isFavourite}
+          onToggleFavourite={() => toggleFavourite(item)}
+          onPress={() => handleWallpaperPress(item)}
+        />
+      </View>
+    );
+  };
 
   if (loading) {
     return <LoadingState paddingTop={paddingTop} />;
@@ -63,6 +74,7 @@ export default function HomeScreen() {
         onRetry={handleRefresh} refreshing={false}  />
     );
   }
+  
   return (
     <View
       style={{ paddingTop }}

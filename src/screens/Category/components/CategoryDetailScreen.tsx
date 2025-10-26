@@ -1,8 +1,7 @@
 import React, { useCallback } from "react";
-import { View, StatusBar, RefreshControl } from "react-native"; // Removed Text, TouchableOpacity
+import { View, StatusBar, RefreshControl } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { FlashList, ListRenderItem } from "@shopify/flash-list";
-// Removed ArrowLeftIcon and HapticFeedback as the Header now handles them
 
 // Refined imports
 import { useSafePadding } from "@hooks/useSafePadding";
@@ -11,11 +10,13 @@ import { PixabayImage } from "@api/index";
 import { AppNavigationProp, CategoryDetailScreenProps } from "@navigation/types";
 
 // Reusable Components
-import { Header } from "@components/common/Header"; // <-- IMPORT THE NEW HEADER
+import { Header } from "@components/common/Header";
 import { WallpaperCard } from "@components/common/WallpaperCard";
 import { LoadingState } from "@components/layout/LoadingState";
 import { ErrorState } from "@components/layout/ErrorState";
 import { ListFooter } from "@components/layout/ListFooter";
+// --- 1. IMPORT THE STORE ---
+import { useFavouritesStore } from '@store/FavouritesStore';
 
 export default function CategoryDetailScreen() {
   const { paddingTop } = useSafePadding();
@@ -33,7 +34,10 @@ export default function CategoryDetailScreen() {
     handleLoadMore,
   } = useCategoryWallpapers(category);
 
-  // This logic now just tells the header *what* to do, not *how* to look
+  // --- 2. CALL HOOKS AT THE TOP LEVEL ---
+  const favourites = useFavouritesStore((state) => state.favourites);
+  const toggleFavourite = useFavouritesStore((state) => state.toggleFavourite);
+
   const handleBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
@@ -44,11 +48,22 @@ export default function CategoryDetailScreen() {
     });
   }, [navigation]);
 
-  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => (
-    <View className="flex-1 p-1.5 mb-3">
-      <WallpaperCard wallpaper={item} onPress={() => handleWallpaperPress(item)} />
-    </View>
-  );
+  // --- 3. UPDATE RENDERITEM ---
+  const renderItem: ListRenderItem<PixabayImage> = ({ item }) => {
+    // Plain JS check, no hook here
+    const isFavourite = favourites.some(fav => fav.id === item.id);
+
+    return (
+      <View className="flex-1 p-1.5 mb-3">
+        <WallpaperCard
+          wallpaper={item}
+          isFavourite={isFavourite}
+          onToggleFavourite={() => toggleFavourite(item)}
+          onPress={() => handleWallpaperPress(item)}
+        />
+      </View>
+    );
+  };
 
   if (loading) {
     return <LoadingState paddingTop={paddingTop} />;
@@ -62,9 +77,7 @@ export default function CategoryDetailScreen() {
 
   return (
     <View style={{ paddingTop }} className="flex-1 bg-background">
-      {/* --- The Old Header View is completely replaced by this single line --- */}
       <Header title={category} onBackPress={handleBack} showBackButton />
-
       <FlashList<PixabayImage>
         data={wallpapers}
         renderItem={renderItem}

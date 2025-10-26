@@ -1,117 +1,18 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-  StatusBar,
-} from 'react-native';
+import { View, Text, Image, StatusBar } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
-import {
-  ArrowLeftIcon,
-  ShareIcon,
-  ArrowDownTrayIcon,
-  InformationCircleIcon,
-} from 'react-native-heroicons/outline';
 import { useWallpaperActions } from '@screens/Wallpaper/hooks/useWallpaperActions';
 import { DetailScreenProps } from '@navigation/types';
 import { InfoModal } from '@screens/Wallpaper/components/InfoModal';
+import { Header } from '@screens/Wallpaper/components/Header';
+import { Footer } from '@screens/Wallpaper/components/Footer';
 
-// --- Reusable IconButton ---
-const IconButton = React.memo(
-  ({ onPress, children }: { onPress: () => void; children: React.ReactNode }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      className="h-12 w-12 items-center justify-center rounded-full bg-black/40"
-    >
-      {children}
-    </TouchableOpacity>
-  )
-);
-
-// --- Header ---
-const Header = React.memo(
-  ({
-    onBack,
-    onShare,
-  }: {
-    onBack: () => void;
-    onShare: () => void;
-  }) => (
-    <LinearGradient
-      colors={['rgba(0,0,0,0.6)', 'transparent']}
-      className="absolute top-0 w-full p-4 pt-16"
-    >
-      <View className="flex-row items-center justify-between">
-        <IconButton onPress={onBack}>
-          <ArrowLeftIcon size={24} color="white" />
-        </IconButton>
-        <IconButton onPress={onShare}>
-          <ShareIcon size={24} color="white" />
-        </IconButton>
-      </View>
-    </LinearGradient>
-  )
-);
-
-// --- Footer ---
-const Footer = React.memo(
-  ({
-    onShowInfo,
-    onDownload,
-    downloading,
-  }: {
-    onShowInfo: () => void;
-    onDownload: () => void;
-    downloading: boolean;
-  }) => (
-    <LinearGradient
-      colors={['transparent', 'rgba(0,0,0,0.8)']}
-      className="absolute bottom-0 w-full p-4 pb-12"
-    >
-      <View className="flex-row items-center gap-x-4">
-        <TouchableOpacity
-          onPress={onShowInfo}
-          className="h-14 w-14 items-center justify-center rounded-full bg-white/20"
-        >
-          <InformationCircleIcon size={28} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={onDownload}
-          disabled={downloading}
-          className="flex-1 flex-row items-center justify-center gap-x-3 rounded-full bg-accent py-4"
-        >
-          {downloading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <>
-              <ArrowDownTrayIcon size={24} color="white" />
-              <Text className="font-heading text-lg text-white">
-                Download
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-  )
-);
-
-// --- Main Screen ---
 export default function WallpaperScreen() {
   const route = useRoute<DetailScreenProps['route']>();
   const wallpaper = JSON.parse(route.params.wallpaper);
 
-  const {
-    downloading,
-    showInfo,
-    setShowInfo,
-    handleBack,
-    handleShare,
-    handleDownload,
-  } = useWallpaperActions(wallpaper);
+  const { downloading, showInfo, setShowInfo, handleBack, handleDownload } =
+    useWallpaperActions(wallpaper);
 
   return (
     <View className="flex-1 bg-black">
@@ -122,9 +23,10 @@ export default function WallpaperScreen() {
         resizeMode="cover"
       />
 
-      <Header onBack={handleBack} onShare={handleShare} />
+      <Header onBack={handleBack} onShowInfo={() => setShowInfo(true)} />
+
       <Footer
-        onShowInfo={() => setShowInfo(true)}
+        onDummyAction={() => console.log('Future download button pressed')}
         onDownload={handleDownload}
         downloading={downloading}
       />

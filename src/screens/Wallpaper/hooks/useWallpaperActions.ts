@@ -2,28 +2,23 @@ import { useState } from 'react';
 import {
   Platform,
   PermissionsAndroid,
-  Alert,
   Share,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import ReactNativeBlobUtil, { FetchBlobResponse } from 'react-native-blob-util';
-import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import HapticFeedback from 'react-native-haptic-feedback';
 import Toast from 'react-native-toast-message';
 import { storage, DownloadedWallpaper } from '@utils/storage';
 import { PixabayImage } from '@api/index';
+import { downloadImage } from '@utils/downloadImage';
 
 export const useWallpaperActions = (wallpaper: PixabayImage) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const navigation = useNavigation<any>();
 
-  /** ✅ Request correct permission per Android version */
   const requestStoragePermission = async (): Promise<boolean> => {
     if (Platform.OS === 'android') {
       const sdkInt = Platform.Version as number;
-
-      // Android 13+ uses READ_MEDIA_IMAGES instead of WRITE_EXTERNAL_STORAGE
       const permission =
         sdkInt >= 33
           ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
@@ -45,49 +40,34 @@ export const useWallpaperActions = (wallpaper: PixabayImage) => {
     return true;
   };
 
-  /** ✅ Go back to previous screen */
-  const handleBack = () => {
-    navigation.goBack();
-  };
+  const handleBack = () => navigation.goBack();
 
-  /** ✅ Share wallpaper link */
   const handleShare = async () => {
     try {
-      await Share.share({
-        message: wallpaper.largeImageURL,
-      });
+      await Share.share({ message: wallpaper.largeImageURL });
     } catch (error) {
       console.error('Error sharing wallpaper:', error);
     }
   };
 
-  /** ✅ Download & save wallpaper */
   const handleDownload = async () => {
     setIsDownloading(true);
     HapticFeedback.trigger('impactMedium');
 
     const hasPermission = await requestStoragePermission();
     if (!hasPermission) {
-      Alert.alert(
-        'Permission Denied',
-        'Storage permission is required to download wallpapers.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'OK', onPress: () => handleDownload() },
-        ]
-      );
+      Toast.show({
+        type: 'error',
+        text1: 'Permission Denied',
+        text2: 'Storage permission is required to download wallpapers.',
+        position: 'top',
+      });
       setIsDownloading(false);
       return;
     }
 
     try {
-      const res: FetchBlobResponse = await ReactNativeBlobUtil.config({
-        fileCache: true,
-        appendExt: 'jpg',
-      }).fetch('GET', wallpaper.largeImageURL);
-
-      const filePath = res.path();
-      const localUri = await CameraRoll.save(filePath, { type: 'photo' });
+      const localUri = await downloadImage(wallpaper.largeImageURL);
 
       const newDownload: DownloadedWallpaper = {
         id: String(wallpaper.id),
@@ -102,14 +82,21 @@ export const useWallpaperActions = (wallpaper: PixabayImage) => {
       };
 
       await storage.addDownload(newDownload);
+
       Toast.show({
         type: 'success',
         text1: 'Wallpaper Downloaded',
-        text2: 'The wallpaper has been saved to your gallery.',
+        text2: 'Saved to your gallery 🎉',
+        position: 'top',
       });
     } catch (error) {
       console.error('Download error:', error);
-      Alert.alert('Error', 'Failed to download or save the wallpaper.');
+      Toast.show({
+        type: 'error',
+        text1: 'Download Failed',
+        text2: 'Something went wrong while saving.',
+        position: 'top',
+      });
     } finally {
       setIsDownloading(false);
     }

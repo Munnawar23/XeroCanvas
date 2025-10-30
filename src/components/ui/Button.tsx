@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, Text } from "react-native";
+import { Pressable, Text, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,62 +7,55 @@ import Animated, {
 } from "react-native-reanimated";
 import { wp, hp } from "@helpers/index";
 
-/**
- * Props for the Button component.
- */
 type ButtonProps = {
-  /** The text to be displayed inside the button. */
   title: string;
-  /** The function to call when the button is pressed. */
   onPress: () => void;
-  /** If true, the button will be non-interactive. Defaults to false. */
   disabled?: boolean;
+  variant?: "primary" | "secondary";
+  icon?: React.ReactNode;
+  width?: number | string; 
 };
 
-/**
- * A memoized, animated primary button component.
- * It uses the app's design system for styling and provides visual feedback on press.
- */
-export const Button = React.memo(({ title, onPress, disabled = false }: ButtonProps) => {
-  const scale = useSharedValue(1);
+export const Button = React.memo(
+  ({
+    title,
+    onPress,
+    disabled = false,
+    variant = "primary",
+    icon,
+    width = wp(85), 
+  }: ButtonProps) => {
+    const scale = useSharedValue(1);
 
-  // Animated style that applies the transform based on the shared value
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
+    const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ scale: scale.value }],
+    }));
+
+    const handlePressIn = () => (scale.value = withSpring(0.97));
+    const handlePressOut = () => (scale.value = withSpring(1));
+
+    const getButtonClasses = () => {
+      if (disabled)
+        return "bg-button-disabled dark:bg-dark-button-disabled opacity-60";
+      if (variant === "secondary")
+        return "bg-button-secondary dark:bg-dark-button-secondary";
+      return "bg-button-primary dark:bg-dark-button-primary";
     };
-  });
 
-  // --- Animation Handlers ---
-
-  const handlePressIn = () => {
-    // Use withSpring for a bouncy, physical-feeling press effect
-    scale.value = withSpring(0.97);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
-
-  return (
-    <Animated.View style={animatedStyle}>
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        disabled={disabled}
-        // Apply theme-aware accent color for the background
-        className={`
-          justify-center items-center rounded-xl 
-          bg-accent dark:bg-dark-accent
-          ${disabled ? "opacity-60" : ""}
-        `}
-        style={{ width: wp(85), height: hp(6) }}
-      >
-        <Text className="text-white font-accent text-lg">
-          {title}
-        </Text>
-      </Pressable>
-    </Animated.View>
-  );
-});
+    return (
+      <Animated.View style={[animatedStyle, { width } as ViewStyle]}>
+        <Pressable
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          disabled={disabled}
+          className={`flex-row justify-center items-center gap-x-3 rounded-xl ${getButtonClasses()}`}
+          style={{ height: hp(6) }}
+        >
+          {icon}
+          <Text className="text-white font-accent text-lg">{title}</Text>
+        </Pressable>
+      </Animated.View>
+    );
+  }
+);

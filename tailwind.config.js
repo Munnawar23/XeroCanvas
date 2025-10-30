@@ -9,24 +9,33 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Light Theme
-        background: "#F9FAFB",
-        card: "#FFFFFF",
-        text: "#1E293B",
-        subtext: "#64748B",
-        accent: "#3B82F6",
-        border: "#E5E7EB",
-        overlay: "rgba(0,0,0,0.04)",
+        background: "#F5E6D3",
+        card: "#FFF8E7",
+        text: "#3E2723",
+        subtext: "#8D6E63",
+        accent: "#D4A574",
+        border: "#E0C9A6",
+        overlay: "rgba(62,39,35,0.05)",
 
-        // Dark Theme
+        // Button colors
+           button: {
+          primary: "#000000",      
+          secondary: "#D4A574",     
+          disabled: "#B0A090",      
+        },
         dark: {
-          background: "#111827", // A deep, dark blue-gray
-          card: "#1F2937",      // A slightly lighter card background
-          text: "#F1F5F9",      // A soft, off-white for text
-          subtext: "#9CA3AF",    // A muted gray for secondary text
-          accent: "#60A5FA",      // A brighter, more vivid accent for dark mode
-          border: "#374151",      // A softer border color
-          overlay: "rgba(255,255,255,0.04)", // A light overlay for contrast
+          background: "#1A1612",
+          card: "#2B2520",
+          text: "#F4E4C1",
+          subtext: "#C9B896",
+          accent: "#FF6B35",
+          border: "#3D342E",
+          overlay: "rgba(244,228,193,0.04)",
+          button: {
+            primary: "#D4422E",     
+            secondary: "#E8AA42",   
+            disabled: "#5C4F47",    
+          },
         },
       },
       fontFamily: {

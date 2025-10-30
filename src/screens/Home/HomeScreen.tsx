@@ -72,7 +72,6 @@ export default function HomeScreen() {
   };
 
   // --- Render logic based on state ---
-
   if (loading) {
     return <LoadingState paddingTop={paddingTop} />;
   }
@@ -93,22 +92,18 @@ export default function HomeScreen() {
       style={{ paddingTop }}
       className="flex-1 bg-background dark:bg-dark-background"
     >
-      {/* Status bar that adapts to the current theme */}
-      <StatusBar
-        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
-      />
-
       {/* Screen Title */}
       <Text className="px-4 pb-3 font-heading text-3xl text-text dark:text-dark-text">
         XeroCanvas
       </Text>
 
-      {/* Masonry list of wallpapers */}
+      {/* Masonry list using FlashList v2 */}
       <FlashList<PixabayImage>
         data={wallpapers}
         renderItem={renderItem}
         keyExtractor={item => item.id.toString()}
         numColumns={2}
+        masonry
         contentContainerStyle={{ paddingHorizontal: 4 }}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}

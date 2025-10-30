@@ -12,7 +12,7 @@ import {
   AppNavigationProp,
   CategoryDetailScreenProps,
 } from '@navigation/types';
-import { Header } from '@components/common/Header';
+import { Header } from '@components/ui/Header';
 import { WallpaperCard } from '@components/common/WallpaperCard';
 import { LoadingState } from '@components/layout/LoadingState';
 import { ErrorState } from '@components/layout/ErrorState';
@@ -52,7 +52,6 @@ export default function CategoryDetailScreen() {
 
   const handleWallpaperPress = useCallback(
     (wallpaper: PixabayImage) => {
-      // Use 'push' to allow navigating to the same screen type with different data
       navigation.push('Detail', {
         wallpaper: JSON.stringify(wallpaper),
       });
@@ -108,7 +107,7 @@ export default function CategoryDetailScreen() {
         renderItem={renderItem}
         keyExtractor={item => item.id.toString()}
         numColumns={2}
-        // estimatedItemSize removed
+        masonry // <-- THE FIX IS APPLIED HERE
         contentContainerStyle={{ paddingHorizontal: 4 }}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}

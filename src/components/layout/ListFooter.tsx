@@ -21,7 +21,7 @@ export function ListFooter({ loadingMore }: ListFooterProps) {
     <View className="py-8">
       <ActivityIndicator 
         size="large" 
-        color={colorScheme === 'dark' ? '#9CA3AF' : '#64748B'} // Use subtext color from theme
+        color={colorScheme === 'dark' ? '#9CA3AF' : '#64748B'} 
       />
     </View>
   );

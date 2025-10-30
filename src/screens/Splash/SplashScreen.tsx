@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, ImageBackground, Text, StatusBar } from "react-native";
+import { View, ImageBackground, Text } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Animated, {
   useSharedValue,
@@ -9,6 +9,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { useColorScheme } from "nativewind";
+import HapticFeedback from "react-native-haptic-feedback";
 import { wp, hp } from "@helpers/index";
 import { Button } from "@components/ui/Button";
 
@@ -18,10 +19,9 @@ import { Button } from "@components/ui/Button";
  */
 export default function SplashScreen({ navigation }: any) {
   const { colorScheme } = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = colorScheme === "dark";
 
   // --- Animation Shared Values ---
-  // These values control the opacity and position of various UI elements for a staggered entrance animation.
   const gradientOpacity = useSharedValue(0);
   const titleOpacity = useSharedValue(0);
   const titleTranslateY = useSharedValue(hp(5));
@@ -30,8 +30,7 @@ export default function SplashScreen({ navigation }: any) {
   const buttonOpacity = useSharedValue(0);
   const buttonTranslateY = useSharedValue(hp(5));
 
-  // --- Animation Setup Effect ---
-  // This effect runs once on component mount to trigger the entrance animations.
+  // --- Entrance Animations ---
   useEffect(() => {
     const animationConfig = { duration: 800, easing: Easing.out(Easing.exp) };
     gradientOpacity.value = withTiming(1, { ...animationConfig, duration: 1000 });
@@ -41,10 +40,9 @@ export default function SplashScreen({ navigation }: any) {
     subtitleTranslateY.value = withDelay(300, withTiming(0, animationConfig));
     buttonOpacity.value = withDelay(500, withTiming(1, animationConfig));
     buttonTranslateY.value = withDelay(500, withTiming(0, animationConfig));
-  }, [gradientOpacity, titleOpacity, titleTranslateY, subtitleOpacity, subtitleTranslateY, buttonOpacity, buttonTranslateY]);
+  }, []);
 
   // --- Animated Styles ---
-  // These style objects are derived from the shared values to apply the animations to the components.
   const gradientAnimatedStyle = useAnimatedStyle(() => ({ opacity: gradientOpacity.value }));
   const titleAnimatedStyle = useAnimatedStyle(() => ({
     opacity: titleOpacity.value,
@@ -59,40 +57,49 @@ export default function SplashScreen({ navigation }: any) {
     transform: [{ translateY: buttonTranslateY.value }],
   }));
 
-  // --- Theme-Aware Gradient Colors ---
-  // The gradient fades to the app's background color for a seamless transition.
+  // --- Gradient Colors ---
   const gradientColors = isDarkMode
-    ? ["transparent", "rgba(17, 24, 39, 0.8)", "#111827"] // Fades to dark.background
-    : ["transparent", "rgba(249, 250, 251, 0.8)", "#F9FAFB"]; // Fades to background
+    ? ["transparent", "rgba(17, 24, 39, 0.8)", "#111827"]
+    : ["transparent", "rgba(249, 250, 251, 0.8)", "#F9FAFB"];
+
+  // --- Button Handler with Haptic ---
+  const handleGetStarted = () => {
+    HapticFeedback.trigger("impactMedium", {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+    navigation.replace("Main");
+  };
 
   return (
     <View className="flex-1">
-      {/* Status bar adapts to the current theme */}
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
-
       <ImageBackground
         source={require("@assets/images/splash.webp")}
         className="flex-1"
         resizeMode="cover"
       >
         {/* --- Bottom Fade Gradient --- */}
-        <Animated.View style={[{ position: "absolute", bottom: 0, width: "100%", height: hp(35) }, gradientAnimatedStyle]}>
-          <LinearGradient
-            colors={gradientColors}
-            locations={[0, 0.2, 1]}
-            className="flex-1"
-          />
+        <Animated.View
+          style={[{ position: "absolute", bottom: 0, width: "100%", height: hp(35) }, gradientAnimatedStyle]}
+        >
+          <LinearGradient colors={gradientColors} locations={[0, 0.2, 1]} className="flex-1" />
         </Animated.View>
 
         {/* --- Animated Title --- */}
-        <Animated.View style={[{ position: "absolute", bottom: hp(16), width: "100%" }, titleAnimatedStyle]} className="items-center">
+        <Animated.View
+          style={[{ position: "absolute", bottom: hp(16), width: "100%" }, titleAnimatedStyle]}
+          className="items-center"
+        >
           <Text className="text-5xl font-heading text-text dark:text-dark-text text-center">
             XeroCanvas
           </Text>
         </Animated.View>
 
         {/* --- Animated Subtitle --- */}
-        <Animated.View style={[{ position: "absolute", bottom: hp(12), width: "100%" }, subtitleAnimatedStyle]} className="items-center px-5">
+        <Animated.View
+          style={[{ position: "absolute", bottom: hp(12), width: "100%" }, subtitleAnimatedStyle]}
+          className="items-center px-5"
+        >
           <Text className="text-xl font-medium text-subtext dark:text-dark-subtext text-center">
             Discover a world of stunning wallpapers.
           </Text>
@@ -103,10 +110,7 @@ export default function SplashScreen({ navigation }: any) {
           style={[{ position: "absolute", bottom: hp(4), width: "100%" }, buttonAnimatedStyle]}
           className="items-center"
         >
-          <Button
-            title="Get Started"
-            onPress={() => navigation.replace("Main")}
-          />
+          <Button title="Get Started" onPress={handleGetStarted} />
         </Animated.View>
       </ImageBackground>
     </View>

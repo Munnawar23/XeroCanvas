@@ -10,9 +10,7 @@
       "@hooks/*": ["./src/hooks/*"],
       "@assets/*": ["./src/assets/*"],
       "@navigation/*": ["./src/navigation/*"],
-      "@services/*": ["./src/services/*"],
       "@types/*": ["./src/types/*"],
-      "@context/*": ["./src/context/*"],
       "@api/*": ["./src/api/*"],
       "@helpers/*": ["./src/helpers/*"],
       "@store/*": ["./src/store/*"]

@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { View, StatusBar, RefreshControl, Platform } from 'react-native';
+import { View, StatusBar, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import { useColorScheme } from 'nativewind';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // Hooks, types, and components
 import { useSafePadding } from '@hooks/useSafePadding';
@@ -56,8 +57,16 @@ export default function SearchScreen() {
     [navigation],
   );
 
+  const handleFilterPress = useCallback(() => {
+    ReactNativeHapticFeedback.trigger('impactMedium', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+    setShowFilters(true);
+  }, []);
+
   /**
-   * Renders a single wallpaper card, checking if it is in the user's favourites.
+   * Renders a single wallpaper card.
    */
   const renderItem: ListRenderItem<PixabayImage> = ({ item }) => {
     const isFavourite = favourites.some(fav => fav.id === item.id);
@@ -74,8 +83,7 @@ export default function SearchScreen() {
   };
 
   /**
-   * Conditionally renders the main content based on the current state
-   * (loading, error, has results, or empty).
+   * Conditionally render list or state views.
    */
   const renderContent = () => {
     if (loading && !refreshing) {
@@ -98,6 +106,7 @@ export default function SearchScreen() {
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
           numColumns={2}
+          masonry
           contentContainerStyle={{
             paddingHorizontal: 4,
             paddingBottom: 90,
@@ -123,19 +132,22 @@ export default function SearchScreen() {
       style={{ paddingTop }}
       className="flex-1 bg-background dark:bg-dark-background"
     >
-      {/* Status bar that adapts to the current theme */}
+      {/* Status bar */}
       <StatusBar
         barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
       />
+
       {/* Search Bar */}
       <SearchBar
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
         onClearSearch={handleClearSearch}
-        onFilterPress={() => setShowFilters(true)}
+        onFilterPress={handleFilterPress}
       />
+
       {/* Main Content */}
       {renderContent()}
+
       {/* Filter Modal */}
       <FilterModal
         visible={showFilters}

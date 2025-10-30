@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { ArrowLeftIcon } from 'react-native-heroicons/outline';
 import HapticFeedback from 'react-native-haptic-feedback';
-import { useColorScheme } from 'nativewind'; // 1. Import useColorScheme
+import { useColorScheme } from 'nativewind'; 
 
 /**
  * Props for the Header component.

@@ -60,11 +60,6 @@ const OfflineState = () => {
           Please check your internet connection and try again. An active
           internet connection is required to use this app.
         </Text>
-        
-        {/* Call to Action */}
-        <Text className="text-center font-body text-subtext/60 dark:text-dark-subtext/60 mt-2">
-          Pull down to refresh
-        </Text>
       </View>
     </ScrollView>
   );

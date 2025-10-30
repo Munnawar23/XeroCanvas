@@ -49,7 +49,7 @@ export const WallpaperCard = ({ wallpaper, isFavourite, onPress, onToggleFavouri
   };
 
   const handlePress = () => {
-    HapticFeedback.trigger('impactLight');
+    HapticFeedback.trigger('impactMedium');
     onPress();
   };
 

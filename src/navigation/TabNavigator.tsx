@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { useColorScheme } from "nativewind";
+import HapticFeedback from "react-native-haptic-feedback";
 
 // Screens
 import HomeScreen from "@screens/Home/HomeScreen";
@@ -13,7 +14,7 @@ import FavouritesScreen from "@screens/Favourites/FavouritesScreen";
 // Components
 import OfflineState from "@components/layout/OfflineState";
 
-// Heroicons
+// Icons
 import {
   HomeIcon,
   TagIcon,
@@ -24,29 +25,23 @@ import {
 const Tab = createBottomTabNavigator();
 
 export default function MainTabNavigator() {
+  // --- 1. Call all hooks unconditionally at the top ---
   const netInfo = useNetInfo();
   const { colorScheme } = useColorScheme();
 
-  // Tailwind colors from config
+  // --- Theme colors with retro palette ---
   const colors = useMemo(
     () => ({
-      active: colorScheme === "dark" ? "#A78BFA" : "#3B82F6",
-      inactive: colorScheme === "dark" ? "#CBD5E1" : "#64748B",
-      background: colorScheme === "dark" ? "#1E293B" : "#FFFFFF",
-      shadow: colorScheme === "dark" ? "#000" : "#000",
+      active: colorScheme === "dark" ? "#FF6B35" : "#D4A574",
+      inactive: colorScheme === "dark" ? "#C9B896" : "#8D6E63",
+      background: colorScheme === "dark" ? "#1A1612" : "#F5E6D3",
+      tabBar: colorScheme === "dark" ? "#2B2520" : "#FFF8E7",
+      shadow: colorScheme === "dark" ? "#000" : "#3E2723",
     }),
     [colorScheme]
   );
 
-  // Show offline state if there is no internet
-  if (netInfo.isConnected === false) {
-    return <OfflineState />;
-  }
-
-  /**
-   * Returns the appropriate icon for each tab.
-   * Uses useMemo to avoid unnecessary re-renders.
-   */
+  // --- Icon Renderer ---
   const renderIcon = useMemo(
     () => (routeName: string, color: string, focused: boolean) => {
       const iconSize = focused ? 26 : 22;
@@ -66,13 +61,27 @@ export default function MainTabNavigator() {
     []
   );
 
+  // --- Medium Haptic Trigger ---
+  const triggerMediumHaptic = () => {
+    HapticFeedback.trigger("impactMedium", {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false,
+    });
+  };
+
+  // --- 2. Perform conditional rendering after all hooks are called ---
+  if (netInfo.isConnected === false) {
+    return <OfflineState />;
+  }
+
+  // --- 3. Return the main navigator if the condition is not met ---
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
           position: "absolute" as const,
-          backgroundColor: colors.background,
+          backgroundColor: colors.tabBar,
           borderRadius: 20,
           marginHorizontal: 40,
           marginBottom: Platform.OS === "ios" ? 40 : 30,
@@ -89,13 +98,37 @@ export default function MainTabNavigator() {
         tabBarActiveTintColor: colors.active,
         tabBarInactiveTintColor: colors.inactive,
         tabBarShowLabel: false,
-        tabBarIcon: ({ color, size, focused }) => renderIcon(route.name, color, focused),
+        tabBarIcon: ({ color, focused }) => renderIcon(route.name, color, focused),
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Category" component={CategoryScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Favourites" component={FavouritesScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        listeners={{
+          tabPress: triggerMediumHaptic,
+        }}
+      />
+      <Tab.Screen
+        name="Category"
+        component={CategoryScreen}
+        listeners={{
+          tabPress: triggerMediumHaptic,
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={SearchScreen}
+        listeners={{
+          tabPress: triggerMediumHaptic,
+        }}
+      />
+      <Tab.Screen
+        name="Favourites"
+        component={FavouritesScreen}
+        listeners={{
+          tabPress: triggerMediumHaptic,
+        }}
+      />
     </Tab.Navigator>
   );
 }

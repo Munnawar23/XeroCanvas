@@ -43,7 +43,7 @@ export const CategoryCard = React.memo(({ category, imageUrl, onPress }: Categor
     scale.value = withSpring(1);
   };
   const handlePress = () => {
-    HapticFeedback.trigger('impactLight');
+    HapticFeedback.trigger('impactMedium');
     onPress();
   };
 

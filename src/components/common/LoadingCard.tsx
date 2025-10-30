@@ -45,7 +45,6 @@ export const LoadingCard = ({ aspectRatio = 1.5 }: LoadingCardProps) => {
     <View className="w-full overflow-hidden rounded-xl">
       <Animated.View
         style={[{ aspectRatio }, animatedStyle]}
-        // Use theme-aware border color for the shimmering background
         className="w-full rounded-xl bg-border dark:bg-dark-border"
       />
     </View>

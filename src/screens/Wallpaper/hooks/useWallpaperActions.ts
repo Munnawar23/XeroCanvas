@@ -37,30 +37,6 @@ export const useWallpaperActions = (wallpaper: PixabayImage) => {
 
   const handleBack = () => navigation.goBack();
 
-  // --- Share the wallpaper after downloading locally ---
-  const handleShare = async () => {
-    setIsDownloading(true);
-    HapticFeedback.trigger('impactMedium');
-
-    try {
-      const localUri = await downloadImage(wallpaper.largeImageURL);
-
-      await Share.share({
-        url: localUri, // Local file path
-      });
-    } catch (error) {
-      console.error('Error sharing wallpaper:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Share Failed',
-        text2: 'Unable to share wallpaper.',
-        position: 'top',
-      });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   // --- Download and save wallpaper ---
   const handleDownload = async () => {
     setIsDownloading(true);
@@ -119,7 +95,6 @@ export const useWallpaperActions = (wallpaper: PixabayImage) => {
     showInfo,
     setShowInfo,
     handleBack,
-    handleShare,
     handleDownload,
   };
 };

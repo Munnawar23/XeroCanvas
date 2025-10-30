@@ -132,11 +132,6 @@ export default function SearchScreen() {
       style={{ paddingTop }}
       className="flex-1 bg-background dark:bg-dark-background"
     >
-      {/* Status bar */}
-      <StatusBar
-        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
-      />
-
       {/* Search Bar */}
       <SearchBar
         searchQuery={searchQuery}

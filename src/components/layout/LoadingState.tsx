@@ -14,10 +14,9 @@ export function LoadingState({ paddingTop }: LoadingStateProps) {
   return (
     <View
       style={{ paddingTop }}
-      className="flex-1 bg-background dark:bg-dark-background px-4">
-      {/* An empty title space to match the home screen layout */}
-      <View className="h-[48px] mt-3" />
-      <View className="flex-row gap-x-3">
+      className="flex-1 bg-background dark:bg-dark-background px-4"
+    >
+      <View className="flex-row gap-x-3 mt-3">
         {/* Column 1 of loading cards */}
         <View className="flex-1 gap-y-3">
           <LoadingCard aspectRatio={0.8} />

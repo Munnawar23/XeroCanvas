@@ -25,11 +25,9 @@ import {
 const Tab = createBottomTabNavigator();
 
 export default function MainTabNavigator() {
-  // --- 1. Call all hooks unconditionally at the top ---
   const netInfo = useNetInfo();
   const { colorScheme } = useColorScheme();
 
-  // --- Theme colors with retro palette ---
   const colors = useMemo(
     () => ({
       active: colorScheme === "dark" ? "#FF6B35" : "#D4A574",
@@ -61,7 +59,6 @@ export default function MainTabNavigator() {
     []
   );
 
-  // --- Medium Haptic Trigger ---
   const triggerMediumHaptic = () => {
     HapticFeedback.trigger("impactMedium", {
       enableVibrateFallback: true,
@@ -69,12 +66,10 @@ export default function MainTabNavigator() {
     });
   };
 
-  // --- 2. Perform conditional rendering after all hooks are called ---
   if (netInfo.isConnected === false) {
     return <OfflineState />;
   }
 
-  // --- 3. Return the main navigator if the condition is not met ---
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

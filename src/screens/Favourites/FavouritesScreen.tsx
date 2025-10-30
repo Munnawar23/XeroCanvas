@@ -86,8 +86,6 @@ export default function FavouritesScreen() {
 
   return (
     <View style={{ paddingTop }} className="flex-1 bg-background dark:bg-dark-background">
-      <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
-
       <View className="px-4 pb-4">
         <Text className="font-heading text-3xl text-text dark:text-dark-text">
           My Favourites

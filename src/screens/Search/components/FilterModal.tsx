@@ -127,12 +127,12 @@ export const FilterModal = ({
             <Text className="mb-3 font-medium text-text dark:text-dark-text">
               Sort By
             </Text>
-            <View className="flex-row space-x-2">
+            <View className="flex-row gap-x-2">
               {['Popular', 'Latest'].map(order => (
                 <TouchableOpacity
                   key={order}
                   onPress={() => handleOrderChange(order.toLowerCase() as 'popular' | 'latest')}
-                  className={`flex-1 items-center rounded-lg py-2 ${
+                  className={`flex-1 items-center rounded-lg py-3 ${
                     filters.order === order.toLowerCase()
                       ? 'bg-accent dark:bg-dark-accent'
                       : 'bg-background dark:bg-dark-background'

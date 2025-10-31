@@ -63,7 +63,6 @@ Built using **React Native (CLI)** + **TypeScript**
 
 git clone https://github.com/yourusername/xerocanvas.git
 cd xerocanvas
-git checkout dev
 npm install
 npm start
 🧩 Environment Variables

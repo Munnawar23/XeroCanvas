@@ -116,17 +116,6 @@ export default function SettingsScreen() {
     );
   };
 
-  const handleShareApp = async () => {
-    try {
-      await Share.share({
-        message: 'Check out XeroCanvas - Discover stunning wallpapers! Download now: https://xerocanvas.app',
-        title: 'XeroCanvas - Beautiful Wallpapers',
-      });
-    } catch (error) {
-      console.error('Error sharing app:', error);
-    }
-  };
-
   const handleThemeSelect = async (theme: 'light' | 'dark') => {
     HapticFeedback.trigger('impactMedium', {
       enableVibrateFallback: true,
@@ -241,17 +230,10 @@ export default function SettingsScreen() {
           danger
         />
 
-        {/* 4. Community Section */}
+        {/* 4. Support Section */}
         <Text className="text-sm font-semibold text-subtext dark:text-dark-subtext mb-3 mt-6">
-          COMMUNITY
+          SUPPORT
         </Text>
-        <SettingsOption
-          icon={<ShareIcon size={24} color={iconColor} />}
-          title="Share App"
-          subtitle="Share with friends and family"
-          onPress={handleShareApp}
-          showChevron={false}
-        />
 
         <SettingsOption
           icon={<LifebuoyIcon size={24} color={iconColor} />}

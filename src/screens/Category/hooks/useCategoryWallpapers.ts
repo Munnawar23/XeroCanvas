@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchWallpapers, PixabayImage, PixabayResponse } from "@api/index";
 import { storage } from "@utils/storage";
+import { SettingsStore } from "@store/SettingsStore";
 
 /**
  * Custom hook to fetch wallpapers for a specific category.
@@ -37,8 +38,11 @@ export const useCategoryWallpapers = (category: string) => {
           }
         }
 
+        // Get latest safe search setting
+        const safeSearch = await SettingsStore.getSafeSearch();
+
         // Fetch from API
-        const data = await fetchWallpapers({ category, page: pageNum, order: "popular" });
+        const data = await fetchWallpapers({ category, page: pageNum, order: "popular", safesearch: safeSearch });
         await storage.setCache(cacheKey, data);
 
         if (data?.hits) {

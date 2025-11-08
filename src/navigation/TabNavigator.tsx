@@ -10,6 +10,7 @@ import HomeScreen from "@screens/Home/HomeScreen";
 import CategoryScreen from "@screens/Category/CategoryScreen";
 import SearchScreen from "@screens/Search/SearchScreen";
 import FavouritesScreen from "@screens/Favourites/FavouritesScreen";
+import SettingsScreen from "@screens/Settings/SettingsScreen";
 
 // Components
 import OfflineState from "@components/layout/OfflineState";
@@ -20,6 +21,7 @@ import {
   TagIcon,
   MagnifyingGlassIcon,
   HeartIcon,
+  Cog6ToothIcon,
 } from "react-native-heroicons/outline";
 
 const Tab = createBottomTabNavigator();
@@ -52,6 +54,8 @@ export default function MainTabNavigator() {
           return <MagnifyingGlassIcon color={color} size={iconSize} />;
         case "Favourites":
           return <HeartIcon color={color} size={iconSize} />;
+        case "Settings":
+          return <Cog6ToothIcon color={color} size={iconSize} />;
         default:
           return <HomeIcon color={color} size={iconSize} />;
       }
@@ -120,6 +124,13 @@ export default function MainTabNavigator() {
       <Tab.Screen
         name="Favourites"
         component={FavouritesScreen}
+        listeners={{
+          tabPress: triggerMediumHaptic,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
         listeners={{
           tabPress: triggerMediumHaptic,
         }}

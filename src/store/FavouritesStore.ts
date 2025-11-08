@@ -8,6 +8,7 @@ interface FavouritesState {
   favourites: PixabayImage[];
   toggleFavourite: (wallpaper: PixabayImage) => void;
   isFavourite: (wallpaperId: number) => boolean;
+  clearAll: () => void;
 }
 
 /**
@@ -38,6 +39,9 @@ export const useFavouritesStore = create<FavouritesState>()(
       },
       isFavourite: (wallpaperId) => {
         return get().favourites.some(fav => fav.id === wallpaperId);
+      },
+      clearAll: () => {
+        set({ favourites: [] });
       },
     }),
     {

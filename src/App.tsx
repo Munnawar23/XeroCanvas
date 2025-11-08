@@ -1,12 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { useColorScheme } from "nativewind";
 import RootNavigator from "@navigation/RootNavigator";
 import Toast from "react-native-toast-message";
+import { ThemeStore } from "@store/ThemeStore";
 import "../global.css";
 
 export default function App() {
-  const { colorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
+
+  useEffect(() => {
+    ThemeStore.getTheme().then((savedTheme) => {
+      setColorScheme(savedTheme);
+    });
+  }, []);
 
   return (
     <>

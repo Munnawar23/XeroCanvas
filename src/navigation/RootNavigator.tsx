@@ -4,13 +4,19 @@ import { NavigationContainer } from "@react-navigation/native";
 import SplashScreen from "@screens/Splash/SplashScreen";
 import MainTabNavigator from "@navigation/TabNavigator";
 import CategoryDetailScreen from "@screens/Category/components/CategoryDetailScreen";
-import WallpaperScreen from "@screens/Wallpaper/WallpaperScreen"; 
+import WallpaperScreen from "@screens/Wallpaper/WallpaperScreen";
+import TermsConditionsScreen from "@screens/Settings/components/TermsConditionsScreen";
+import PrivacyPolicyScreen from "@screens/Settings/components/PrivacyPolicyScreen";
+import AboutScreen from "@screens/Settings/components/AboutScreen";
 
 export type RootStackParamList = {
   Splash: undefined;
   Main: undefined;
   Detail: { wallpaper: string };
   CategoryDetail: { category: string };
+  TermsConditions: undefined;
+  PrivacyPolicy: undefined;
+  About: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -22,7 +28,10 @@ export default function RootStackNavigator() {
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
-        <Stack.Screen name="Detail" component={WallpaperScreen} /> 
+        <Stack.Screen name="Detail" component={WallpaperScreen} />
+        <Stack.Screen name="TermsConditions" component={TermsConditionsScreen} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+        <Stack.Screen name="About" component={AboutScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

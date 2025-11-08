@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import HapticFeedback from "react-native-haptic-feedback";
 import { fetchWallpapers, PixabayImage } from "@api/index";
 import { FilterState } from "@screens/Search/components/FilterModal";
+import { SettingsStore } from "@store/SettingsStore";
 
 /**
  * Debounce utility to prevent excessive API calls while typing.
@@ -62,12 +63,16 @@ export const useSearch = () => {
       try {
         if (!hasSearched.current) hasSearched.current = true;
 
+        // Get latest safe search setting
+        const safeSearch = await SettingsStore.getSafeSearch();
+
         const response = await fetchWallpapers({
           q: query,
           colors: currentFilters.colors.join(","),
           editors_choice: currentFilters.editorsChoice || undefined,
           order: currentFilters.order,
           page: pageNum,
+          safesearch: safeSearch,
         });
 
         // Check if there are more results

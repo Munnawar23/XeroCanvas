@@ -13,7 +13,7 @@ Built using **React Native (CLI)** + **TypeScript**
 - Mark wallpapers as favorite ❤️  
 - Offline Screen — detects connection using NetInfo  
 - Smooth Lottie animations for loading, empty, and offline states  
-- **Dynamic theme support (light & dark modes)**  
+- **Theme support (light & dark modes)**  
 - Haptic feedback and toasts for better UX  
 - Fast performance using FlashList  
 - Persistent storage for favorites using AsyncStorage  
@@ -40,17 +40,6 @@ Built using **React Native (CLI)** + **TypeScript**
 
 ---
 
-## 🧠 HOW THE APP WORKS
-
-- **Splash Screen:** Displays a quick animation while initializing the app.  
-- **Home Screen:** Shows trending wallpapers and detects connection state.  
-- **Category Screen:** Lets users explore wallpapers by category.  
-- **Search Screen:** Provides search with filters.  
-- **Wallpaper Screen:** Allows viewing, downloading, and favoriting wallpapers.  
-- **Favorites Screen:** Displays locally saved favorite wallpapers.  
-
----
-
 ## 🌈 THEMES & LOOK
 
 - Elegant minimal design with gradient backgrounds  
@@ -67,7 +56,7 @@ npm install
 npm start
 🧩 Environment Variables
 Create a .env file in the root directory and add your Pixabay API key:
-PIXABAY_API_KEY="Your API Key"
+PIXABAY_API_KEY=Your API Key
 
 ---
 

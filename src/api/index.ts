@@ -50,7 +50,6 @@ export type FetchWallpapersParams = {
   colors?: string;
   editors_choice?: boolean;
   order?: "popular" | "latest";
-  safesearch?: boolean;
 };
 
 // --- API Functions ---
@@ -65,7 +64,7 @@ export const fetchWallpapers = async (
     key: PIXABAY_API_KEY,
     orientation: "vertical",
     image_type: "photo",
-    safesearch: params.safesearch !== undefined ? params.safesearch : false,
+    safesearch: true,
     per_page: params.per_page || 20,
     page: params.page || 1,
     order: params.order || "popular",
@@ -94,15 +93,13 @@ export const fetchWallpapers = async (
  * Fetch a random preview image from a specific category.
  */
 export const fetchCategoryPreview = async (
-  category: string,
-  safesearch?: boolean
+  category: string
 ): Promise<PixabayImage | null> => {
   try {
     const response = await fetchWallpapers({
       category: category,
       per_page: 10,
       order: "popular",
-      safesearch: safesearch !== undefined ? safesearch : false,
     });
 
     if (response && response.hits.length > 0) {

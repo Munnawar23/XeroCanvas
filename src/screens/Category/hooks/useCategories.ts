@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { CATEGORIES, fetchCategoryPreview } from "@api/index";
 import { storage } from "@utils/storage";
-import { SettingsStore } from "@store/SettingsStore";
+
 
 export type CategoryWithImage = {
   name: string;
@@ -37,13 +37,10 @@ export const useCategories = () => {
         }
       }
 
-      // Get latest safe search setting
-      const safeSearch = await SettingsStore.getSafeSearch();
-
       // Fetch preview image for each category
       const fetchedCategories = await Promise.all(
         CATEGORIES.map(async (category) => {
-          const preview = await fetchCategoryPreview(category, safeSearch);
+          const preview = await fetchCategoryPreview(category);
           return { name: category, imageUrl: preview?.webformatURL || null };
         })
       );

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchWallpapers, PixabayImage } from "@api/index";
 import { storage } from "@utils/storage";
-import { SettingsStore } from "@store/SettingsStore";
+
 
 // Response type for clarity and type safety
 type PixabayResponse = {
@@ -22,12 +22,7 @@ export const useWallpapers = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [safeSearch, setSafeSearch] = useState(false);
 
-  // Load safe search setting
-  useEffect(() => {
-    SettingsStore.getSafeSearch().then(setSafeSearch);
-  }, []);
 
   /**
    * Load wallpapers from cache or API.
@@ -37,8 +32,6 @@ export const useWallpapers = () => {
    */
   const loadWallpapers = useCallback(
     async (pageNum: number = 1, append: boolean = false, forceRefresh: boolean = false) => {
-      // Get latest safe search setting
-      const currentSafeSearch = await SettingsStore.getSafeSearch();
       // Set appropriate loading state
       if (append) {
         setLoadingMore(true);
@@ -62,7 +55,7 @@ export const useWallpapers = () => {
         }
 
         // Fetch data from API
-        const data = await fetchWallpapers({ page: pageNum, order: "popular", safesearch: currentSafeSearch });
+        const data = await fetchWallpapers({ page: pageNum, order: "popular" });
         await storage.setCache(cacheKey, data); // Update cache with fresh data
 
         if (data?.hits) {

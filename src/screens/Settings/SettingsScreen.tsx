@@ -9,16 +9,15 @@ import {
   ShieldCheckIcon,
   InformationCircleIcon,
   TrashIcon,
-  EyeSlashIcon,
+
   ServerStackIcon,
   ShareIcon,
   CheckCircleIcon,
   LifebuoyIcon,
 } from 'react-native-heroicons/outline';
 import { SettingsOption } from './components/SettingsOption';
-import { SettingsToggle } from './components/SettingsToggle';
 import { useFavouritesStore } from '@store/FavouritesStore';
-import { SettingsStore } from '@store/SettingsStore';
+
 import { ThemeStore } from '@store/ThemeStore';
 import Toast from 'react-native-toast-message';
 import { useColorScheme } from 'nativewind';
@@ -31,26 +30,9 @@ export default function SettingsScreen() {
   const clearAllFavourites = useFavouritesStore(state => state.clearAll);
   const favouritesCount = useFavouritesStore(state => state.favourites.length);
   const { colorScheme, setColorScheme } = useColorScheme();
-  const [safeSearch, setSafeSearch] = useState(false);
-
   const iconColor = colorScheme === 'dark' ? '#FF6B35' : '#D4A574';
   const dangerIconColor = colorScheme === 'dark' ? '#EF4444' : '#DC2626';
   const checkColor = colorScheme === 'dark' ? '#10B981' : '#059669';
-
-  // Load safe search preference on mount
-  useEffect(() => {
-    SettingsStore.getSafeSearch().then(setSafeSearch);
-  }, []);
-
-  const handleSafeSearchToggle = async (value: boolean) => {
-    setSafeSearch(value);
-    await SettingsStore.setSafeSearch(value);
-    Toast.show({
-      type: 'success',
-      text1: value ? 'Safe Search Enabled' : 'Safe Search Disabled',
-      position: 'top',
-    });
-  };
 
   const handleClearFavourites = () => {
     Alert.alert(
@@ -197,19 +179,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 2. Safe Search Section */}
-        <Text className="text-sm font-semibold text-subtext dark:text-dark-subtext mb-3 mt-6">
-          SAFE SEARCH
-        </Text>
-        <SettingsToggle
-          icon={<EyeSlashIcon size={24} color={iconColor} />}
-          title="Safe Search"
-          subtitle={safeSearch ? 'Filtering adult content' : 'No content filtering'}
-          value={safeSearch}
-          onValueChange={handleSafeSearchToggle}
-        />
-
-           {/* 3. Storage Section */}
+        {/* 2. Storage Section */}
         <Text className="text-sm font-semibold text-subtext dark:text-dark-subtext mb-3 mt-6">
           STORAGE
         </Text>
@@ -230,7 +200,7 @@ export default function SettingsScreen() {
           danger
         />
 
-        {/* 4. Support Section */}
+        {/* 3. Support Section */}
         <Text className="text-sm font-semibold text-subtext dark:text-dark-subtext mb-3 mt-6">
           SUPPORT
         </Text>
@@ -243,7 +213,7 @@ export default function SettingsScreen() {
           showChevron={false}
         />
 
-        {/* 5. Legal Section */}
+        {/* 4. Legal Section */}
         <Text className="text-sm font-semibold text-subtext dark:text-dark-subtext mb-3 mt-6">
           LEGAL
         </Text>
@@ -258,7 +228,7 @@ export default function SettingsScreen() {
           onPress={() => navigation.navigate('PrivacyPolicy')}
         />
 
-        {/* 6. About Section */}
+        {/* 5. About Section */}
         <Text className="text-sm font-semibold text-subtext dark:text-dark-subtext mb-3 mt-6">
           ABOUT
         </Text>
